@@ -2,20 +2,38 @@ const express = require("express");
 const router = express.Router();
 const Note = require("../models/Note");
 
-// Add Note
 router.post("/add", async (req, res) => {
-  const { subject, topic, content } = req.body;
+  try {
+    console.log("Incoming Data:", req.body);
 
-  const newNote = new Note({ subject, topic, content });
-  await newNote.save();
+    const { subject, topic, content } = req.body;
 
-  res.json({ message: "Note saved successfully" });
+    if (!subject || !topic || !content) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const newNote = new Note({
+      subject,
+      topic,
+      content,
+    });
+
+    await newNote.save();
+
+    res.status(201).json({ message: "Note saved successfully" });
+  } catch (error) {
+    console.error("Save error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
 });
 
-// Get All Notes
 router.get("/", async (req, res) => {
-  const notes = await Note.find();
-  res.json(notes);
+  try {
+    const notes = await Note.find().sort({ createdAt: -1 });
+    res.json(notes);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
 });
 
 module.exports = router;

@@ -1,13 +1,26 @@
 const mongoose = require("mongoose");
 
-const noteSchema = new mongoose.Schema({
-  subject: String,
-  topic: String,
-  content: String,
-  createdAt: {
-    type: Date,
-    default: Date.now,
+const noteSchema = new mongoose.Schema(
+  {
+    subject: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    topic: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-});
+  {
+    timestamps: true, // Automatically adds createdAt & updatedAt
+  }
+);
 
 module.exports = mongoose.model("Note", noteSchema);
