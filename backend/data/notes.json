@@ -1,0 +1,66 @@
+[
+  {
+    "_id": "1773929156169",
+    "subject": "DBMS",
+    "topic": "Test Note",
+    "content": "This is a test note to verify saving works.",
+    "createdAt": "2026-03-19T14:05:56.169Z"
+  },
+  {
+    "_id": "1773929177987",
+    "subject": "Data Structure",
+    "topic": "BST",
+    "content": "bst sdfkjgweigf canwkgfiqwukjfbqwlkf",
+    "createdAt": "2026-03-19T14:06:17.987Z"
+  },
+  {
+    "_id": "1774267139530",
+    "subject": "Test Subject",
+    "topic": "Test Topic",
+    "content": "This is a test note",
+    "createdAt": "2026-03-23T11:58:59.530Z"
+  },
+  {
+    "_id": "1774268245614",
+    "subject": "DBMS",
+    "topic": "normilization",
+    "content": "gasf jfeweoi sjkdewfg skjdgweg",
+    "createdAt": "2026-03-23T12:17:25.614Z"
+  },
+  {
+    "_id": "1774268294714",
+    "subject": "web devlopment",
+    "topic": "dhf",
+    "content": "[File Upload] mlpyq.pdf",
+    "fileUrl": "/uploads/1774268294706-mlpyq.pdf",
+    "fileName": "mlpyq.pdf",
+    "fileSize": 289739,
+    "createdAt": "2026-03-23T12:18:14.714Z"
+  },
+  {
+    "_id": "1774268344969",
+    "subject": "Ml",
+    "topic": "pyq",
+    "content": "[File Upload] mlpyq.pdf",
+    "fileUrl": "/uploads/1774268344960-mlpyq.pdf",
+    "fileName": "mlpyq.pdf",
+    "fileSize": 289739,
+    "createdAt": "2026-03-23T12:19:04.969Z"
+  },
+  {
+    "_id": "1774280681976",
+    "userId": "test@eduplace.com",
+    "subject": "Test Subject",
+    "topic": "Test Topic",
+    "content": "Test Content",
+    "createdAt": "2026-03-23T15:44:41.977Z"
+  },
+  {
+    "_id": "1774281065434",
+    "userId": "test@eduplace.com",
+    "subject": "ai & ml",
+    "topic": "supervised larning",
+    "content": "sdjnfnwjfngweif jskwjeg",
+    "createdAt": "2026-03-23T15:51:05.434Z"
+  }
+]
