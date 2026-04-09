@@ -5,30 +5,6 @@ const path = require("path");
 const fs = require("fs");
 const supabase = require("../config/supabase");
 
-// Local JSON file fallback
-const DATA_FILE = path.join(__dirname, "..", "data", "notes.json");
-
-function readLocalNotes() {
-  try {
-    if (fs.existsSync(DATA_FILE)) {
-      return JSON.parse(fs.readFileSync(DATA_FILE, "utf-8"));
-    }
-  } catch (e) { }
-  return [];
-}
-
-function writeLocalNotes(notes) {
-  const dir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(DATA_FILE, JSON.stringify(notes, null, 2));
-}
-
-function isSupabaseConfigured() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  return !!(url && key && !url.includes("your_supabase_url") && !key.includes("your_supabase_anon") && supabase);
-}
-
 // Map Supabase snake_case to frontend camelCase
 function mapNote(note) {
   return {
@@ -59,7 +35,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = [".pdf", ".doc", ".docx", ".txt", ".ppt", ".pptx", ".png", ".jpg", ".jpeg"];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -80,37 +56,19 @@ router.post("/add", async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Try Supabase first
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('notes')
-          .insert([{ subject, topic, content, user_id: userId }])
-          .select();
-        
-        if (!error) {
-          return res.status(201).json({ message: "Note saved successfully to Supabase!", note: mapNote(data[0]) });
-        }
-        console.warn("Supabase save failed, falling back to local:", error.message);
-      } catch (dbErr) {
-        console.warn("Supabase save error, falling back to local:", dbErr.message);
-      }
+    console.log("Saving note to Supabase...");
+    const { data, error } = await supabase
+      .from('notes')
+      .insert([{ subject, topic, content, user_id: userId || 'anonymous' }])
+      .select();
+
+    if (error) {
+      console.error("Supabase save error:", error.message);
+      return res.status(500).json({ message: "Failed to save note: " + error.message });
     }
 
-    // Fallback to local JSON
-    const notes = readLocalNotes();
-    const newNote = {
-      _id: Date.now().toString(),
-      userId,
-      subject,
-      topic,
-      content,
-      createdAt: new Date().toISOString()
-    };
-    notes.push(newNote);
-    writeLocalNotes(notes);
-
-    res.status(201).json({ message: "Note saved successfully (local storage)!", note: newNote });
+    console.log("Note saved to Supabase ✅");
+    res.status(201).json({ message: "Note saved successfully!", note: mapNote(data[0]) });
   } catch (error) {
     console.error("Save error:", error);
     res.status(500).json({ message: "Server Error: " + error.message });
@@ -130,52 +88,28 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     }
 
     const fileUrl = "/uploads/" + req.file.filename;
-    
-    // Supabase data (snake_case)
-    const supabaseData = {
-      subject,
-      topic,
-      user_id: userId,
-      content: `[File Upload] ${req.file.originalname}`,
-      file_url: fileUrl,
-      file_name: req.file.originalname,
-      file_size: req.file.size,
-    };
 
-    // Try Supabase first
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('notes')
-          .insert([supabaseData])
-          .select();
-        
-        if (!error) {
-          return res.status(201).json({ message: "File uploaded successfully!", note: mapNote(data[0]) });
-        }
-        console.warn("Supabase upload data save failed, falling back to local:", error.message);
-      } catch (dbErr) {
-        console.warn("Supabase upload data save error, falling back to local:", dbErr.message);
-      }
+    console.log("Saving file record to Supabase...");
+    const { data, error } = await supabase
+      .from('notes')
+      .insert([{
+        subject,
+        topic,
+        user_id: userId,
+        content: `[File Upload] ${req.file.originalname}`,
+        file_url: fileUrl,
+        file_name: req.file.originalname,
+        file_size: req.file.size,
+      }])
+      .select();
+
+    if (error) {
+      console.error("Supabase upload save error:", error.message);
+      return res.status(500).json({ message: "Failed to save file record: " + error.message });
     }
 
-    // Fallback to local JSON
-    const notes = readLocalNotes();
-    const newNote = { 
-      _id: Date.now().toString(), 
-      userId,
-      subject, 
-      topic, 
-      content: supabaseData.content,
-      fileUrl,
-      fileName: req.file.originalname,
-      fileSize: req.file.size,
-      createdAt: new Date().toISOString() 
-    };
-    notes.push(newNote);
-    writeLocalNotes(notes);
-
-    res.status(201).json({ message: "File uploaded successfully (local)!", note: newNote });
+    console.log("File record saved to Supabase ✅");
+    res.status(201).json({ message: "File uploaded successfully!", note: mapNote(data[0]) });
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({ message: "Upload failed: " + error.message });
@@ -185,25 +119,21 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 // GET /api/notes - Get all notes
 router.get("/", async (req, res) => {
   try {
-    // Try Supabase first
-    if (isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('notes')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (!error) return res.json(data.map(mapNote));
-        console.warn("Supabase read failed, falling back to local:", error.message);
-      } catch (dbErr) {
-        console.warn("Supabase read error, falling back to local:", dbErr.message);
-      }
+    console.log("Fetching notes from Supabase...");
+    const { data, error } = await supabase
+      .from('notes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error("Supabase read error:", error.message);
+      return res.status(500).json({ message: "Failed to fetch notes: " + error.message });
     }
 
-    // Fallback to local JSON
-    const notes = readLocalNotes().reverse();
-    res.json(notes);
+    console.log(`Fetched ${data.length} notes from Supabase ✅`);
+    res.json(data.map(mapNote));
   } catch (error) {
+    console.error("Server error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });

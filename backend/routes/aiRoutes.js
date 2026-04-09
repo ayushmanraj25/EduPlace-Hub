@@ -10,7 +10,6 @@ router.post("/generate", async (req, res) => {
     if (!prompt) {
       return res.status(400).json({ message: "Prompt is required." });
     }
-
     let apiKey = (process.env.GEMINI_API_KEY || process.env.AI_API_KEY || "").trim();
     if (!apiKey || apiKey === "your_ai_key") {
       return res.status(500).json({ 
@@ -19,7 +18,7 @@ router.post("/generate", async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const systemPrompt = `You are a helpful AI tutor. 
     The user wants study notes on the topic: "{prompt}".
@@ -53,7 +52,9 @@ router.post("/generate", async (req, res) => {
     } catch (apiError) {
        console.error("GOOGLE AI SDK ERROR:", apiError);
        res.status(500).json({ 
-         message: "AI Engine Failed at Generation Layer", 
+         message: apiError.status === 429 
+           ? "AI Quota Exceeded. Please try again later or update your API key."
+           : "AI Engine Failed at Generation Layer", 
          error: apiError.message,
          status: apiError.status || 500
        });
@@ -63,5 +64,4 @@ router.post("/generate", async (req, res) => {
     res.status(500).json({ message: "AI Engine Failed to generate notes. Please check API Key limits or server logs." });
   }
 });
-
 module.exports = router;
