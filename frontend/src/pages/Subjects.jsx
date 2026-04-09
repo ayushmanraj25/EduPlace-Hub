@@ -29,8 +29,24 @@ function Subjects() {
       .catch((err) => console.error(err));
   }, []);
 
+  const normalizeSubject = (sub) => {
+    if (!sub) return "";
+    let s = sub.toLowerCase().trim().replace(/s$/, ""); // Remove plural 's'
+    if (s === "dsa") return "data structure";
+    if (s === "dbms" || s === "database") return "dbm";
+    if (s === "ai & ml" || s === "ml" || s === "ai") return "ai & ml";
+    if (s === "os") return "operating system";
+    if (s === "cn") return "computer network";
+    if (s === "oops" || s === "oop") return "object oriented programming";
+    return s;
+  };
+
   const filteredNotes = selectedSubject
-    ? notes.filter((note) => note.subject?.toLowerCase().trim() === selectedSubject.toLowerCase().trim())
+    ? notes.filter((note) => {
+        const sub1 = normalizeSubject(note.subject);
+        const sub2 = normalizeSubject(selectedSubject);
+        return sub1 === sub2 || (note.subject?.toLowerCase().includes(selectedSubject.toLowerCase()) || selectedSubject.toLowerCase().includes(note.subject?.toLowerCase()));
+      })
     : [];
 
   return (

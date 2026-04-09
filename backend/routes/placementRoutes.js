@@ -27,7 +27,7 @@ function isSupabaseConfigured() {
   return !!(url && key && !url.includes("your_supabase_url") && !key.includes("your_supabase_anon") && supabase);
 }
 
-// GET /api/placement - Fetch questions
+// GET /api/placement - Fetch questions by category
 router.get("/", async (req, res) => {
   try {
     const { category } = req.query;
@@ -36,10 +36,58 @@ router.get("/", async (req, res) => {
       if (category) query = query.eq("category", category);
       const { data, error } = await query.order("created_at", { ascending: false });
       if (!error) return res.json(data);
+      console.error("Supabase GET error:", error.message);
     }
     let local = readLocal();
     if (category) local = local.filter(q => q.category === category);
     res.json(local.reverse());
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+// GET /api/placement/company/:company - Fetch questions for a specific company
+router.get("/company/:company", async (req, res) => {
+  try {
+    const { company } = req.params;
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from("placement_questions")
+        .select("*")
+        .eq("category", "Company Wise")
+        .ilike("company", company)
+        .order("created_at", { ascending: false });
+      if (!error) return res.json(data);
+      console.error("Supabase company GET error:", error.message);
+    }
+    // Fallback to local JSON
+    let local = readLocal();
+    local = local.filter(q => q.category === "Company Wise" && q.company && q.company.toLowerCase() === company.toLowerCase());
+    res.json(local.reverse());
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+// GET /api/placement/companies - Get list of all companies that have questions
+router.get("/companies", async (req, res) => {
+  try {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from("placement_questions")
+        .select("company")
+        .eq("category", "Company Wise")
+        .not("company", "is", null);
+      if (!error) {
+        const unique = [...new Set(data.map(d => d.company))];
+        return res.json(unique);
+      }
+    }
+    let local = readLocal();
+    const unique = [...new Set(local.filter(q => q.company).map(q => q.company))];
+    res.json(unique);
   } catch (error) {
     res.status(500).json({ message: "Server Error" });
   }
@@ -48,9 +96,13 @@ router.get("/", async (req, res) => {
 // POST /api/placement/add - Add question
 router.post("/add", async (req, res) => {
   try {
-    const { category, topic, question, answer, userId } = req.body;
+    const { category, topic, question, answer, userId, company } = req.body;
     if (!category || !topic || !question || !answer) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (category === "Company Wise" && !company) {
+      return res.status(400).json({ message: "Company name is required for Company Wise questions" });
     }
 
     const newQ = {
@@ -58,16 +110,28 @@ router.post("/add", async (req, res) => {
       topic,
       question,
       answer,
+      company: category === "Company Wise" ? company : null,
       user_id: userId,
       created_at: new Date().toISOString()
     };
 
     if (isSupabaseConfigured()) {
-      const { data, error } = await supabase
-        .from("placement_questions")
-        .insert([newQ])
-        .select();
-      if (!error) return res.status(201).json(data[0]);
+      try {
+        console.log("Attempting to save placement question to Supabase...");
+        const { data, error } = await supabase
+          .from("placement_questions")
+          .insert([newQ])
+          .select();
+        if (!error && data && data.length > 0) {
+          console.log("Placement question saved to Supabase ✅");
+          return res.status(201).json(data[0]);
+        }
+        console.error("Supabase INSERT failed:", error ? error.message : "No data returned", " - Falling back to local storage.");
+      } catch (dbErr) {
+        console.error("Supabase INSERT error (exception):", dbErr.message, " - Falling back to local storage.");
+      }
+    } else {
+      console.log("Supabase not configured for placement questions. Using local storage.");
     }
 
     const local = readLocal();
@@ -76,6 +140,7 @@ router.post("/add", async (req, res) => {
     writeLocal(local);
     res.status(201).json(localQ);
   } catch (error) {
+    console.error("Server error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });

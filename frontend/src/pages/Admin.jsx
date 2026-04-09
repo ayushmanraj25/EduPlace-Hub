@@ -14,9 +14,20 @@ function Admin() {
   // Placement State
   const [placementCategory, setPlacementCategory] = useState("Aptitude");
   const [placementTopic, setPlacementTopic] = useState("");
+  const [placementCompany, setPlacementCompany] = useState("");
   const [placementQuestion, setPlacementQuestion] = useState("");
   const [placementAnswer, setPlacementAnswer] = useState("");
+  const [placementYear, setPlacementYear] = useState(new Date().getFullYear());
+  const [placementType, setPlacementType] = useState("Technical");
   const [placementLoading, setPlacementLoading] = useState(false);
+
+  const availableSubjects = [
+    "Data Structures", "DBMS", "Operating System", "Computer Networks",
+    "AI & ML", "Object Oriented Programming", "Software Engineering",
+    "Web Development", "Compiler Design", "Theory of Computation",
+    "Cloud Computing", "Cyber Security", "Discrete Mathematics",
+    "Digital Electronics", "Computer Architecture"
+  ];
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -43,13 +54,10 @@ function Admin() {
           userId: user.email,
         }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || "Failed to save note");
       }
-
       setNotesList((prev) => [...prev, {
         type: "text",
         subject: subject.trim(),
@@ -68,7 +76,6 @@ function Admin() {
       setLoading(false);
     }
   };
-
   const handleFileUpload = async (e) => {
     e.preventDefault();
 
@@ -76,9 +83,7 @@ function Admin() {
       alert("Please select a file and fill Subject & Topic");
       return;
     }
-
     setUploading(true);
-
     try {
       const formData = new FormData();
       formData.append("file", uploadFile);
@@ -86,18 +91,14 @@ function Admin() {
       formData.append("topic", uploadTopic.trim());
 
        formData.append("userId", user.email);
- 
       const response = await fetch("http://localhost:5001/api/notes/upload", {
         method: "POST",
         body: formData,
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || "Upload failed");
       }
-
       setNotesList((prev) => [...prev, {
         type: "file",
         subject: uploadSubject.trim(),
@@ -106,7 +107,6 @@ function Admin() {
         fileSize: uploadFile.size,
       }]);
       alert("File uploaded successfully ✅");
-
       setUploadFile(null);
       setUploadSubject("");
       setUploadTopic("");
@@ -120,40 +120,57 @@ function Admin() {
       setUploading(false);
     }
   };
-
   const handleAddPlacement = async (e) => {
     e.preventDefault();
-    if (!placementTopic.trim() || !placementQuestion.trim() || !placementAnswer.trim()) {
+    const isCompanyWise = placementCategory === "Company Wise";
+    
+    // Custom validation based on category
+    const isTopicFilled = isCompanyWise || placementTopic.trim();
+    const isCompanyFilled = !isCompanyWise || placementCompany.trim();
+
+    if (!isTopicFilled || !isCompanyFilled || !placementQuestion.trim() || !placementAnswer.trim()) {
       alert("Please fill all placement fields");
       return;
     }
-
     setPlacementLoading(true);
     try {
-      const response = await fetch("http://localhost:5001/api/placement/add", {
+      const isCompanyWise = placementCategory === "Company Wise";
+      const endpoint = isCompanyWise 
+        ? "http://localhost:5001/api/company-wise" 
+        : "http://localhost:5001/api/placement/add";
+      
+      const payload = isCompanyWise ? {
+        company: placementCompany.trim(),
+        type: placementType,
+        question: placementQuestion.trim(),
+        answer: placementAnswer.trim(),
+        year: parseInt(placementYear),
+        userId: user.email
+      } : {
+        category: placementCategory,
+        topic: placementTopic.trim(),
+        company: placementCompany.trim(),
+        question: placementQuestion.trim(),
+        answer: placementAnswer.trim(),
+        userId: user.email
+      };
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category: placementCategory,
-          topic: placementTopic.trim(),
-          question: placementQuestion.trim(),
-          answer: placementAnswer.trim(),
-          userId: user.email
-        }),
+        body: JSON.stringify(payload),
       });
-
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to save question");
-
       setNotesList(prev => [...prev, {
         type: "placement",
         subject: placementCategory,
-        topic: placementTopic.trim(),
+        topic: isCompanyWise ? placementCompany.trim() : placementTopic.trim(),
         note: placementQuestion.trim().substring(0, 100) + "..."
       }]);
-
       alert("Placement question saved ✅");
       setPlacementTopic("");
+      setPlacementCompany("");
       setPlacementQuestion("");
       setPlacementAnswer("");
     } catch (error) {
@@ -163,7 +180,6 @@ function Admin() {
       setPlacementLoading(false);
     }
   };
-
   const formatFileSize = (bytes) => {
     if (bytes < 1024) return bytes + " B";
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
@@ -178,7 +194,6 @@ function Admin() {
           Manage platform content — upload text notes or PDF/document files.
         </p>
       </div>
-
       <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
         {/* LEFT COLUMN: FORMS */}
         <div style={{ flex: "1 1 420px", display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -202,7 +217,11 @@ function Admin() {
                 onChange={(e) => setSubject(e.target.value)}
                 className="input-control"
                 disabled={loading}
+                list="subject-options"
               />
+              <datalist id="subject-options">
+                {availableSubjects.map(s => <option key={s} value={s} />)}
+              </datalist>
             </div>
 
             <div style={{ marginBottom: "16px" }}>
@@ -216,7 +235,6 @@ function Admin() {
                 disabled={loading}
               />
             </div>
-
             <div style={{ marginBottom: "24px" }}>
               <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px" }}>Note Content</label>
               <textarea
@@ -258,6 +276,7 @@ function Admin() {
                 onChange={(e) => setUploadSubject(e.target.value)}
                 className="input-control"
                 disabled={uploading}
+                list="subject-options"
               />
             </div>
 
@@ -344,20 +363,63 @@ function Admin() {
                 <option>Technical – DSA</option>
                 <option>Technical – Core CS</option>
                 <option>HR Interview</option>
+                <option>Company Wise</option>
               </select>
             </div>
  
-            <div style={{ marginBottom: "16px" }}>
-              <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px" }}>Topic</label>
-              <input
-                type="text"
-                placeholder="e.g. Recursion, SQL Joins"
-                value={placementTopic}
-                onChange={(e) => setPlacementTopic(e.target.value)}
-                className="input-control"
-              />
-            </div>
- 
+            {placementCategory === "Company Wise" ? (
+              <>
+                <div style={{ marginBottom: "16px" }}>
+                  <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px" }}>Company Name</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Google, Amazon, TCS"
+                    value={placementCompany}
+                    onChange={(e) => setPlacementCompany(e.target.value)}
+                    className="input-control"
+                    required
+                  />
+                </div>
+                <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px" }}>Type</label>
+                    <select
+                      value={placementType}
+                      onChange={(e) => setPlacementType(e.target.value)}
+                      className="input-control"
+                    >
+                      <option>Aptitude</option>
+                      <option>Technical</option>
+                      <option>Coding</option>
+                      <option>HR</option>
+                      <option>System Design</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px" }}>Year</label>
+                    <input
+                      type="number"
+                      placeholder="2025"
+                      value={placementYear}
+                      onChange={(e) => setPlacementYear(e.target.value)}
+                      className="input-control"
+                      required
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px" }}>Topic</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Recursion, SQL Joins"
+                  value={placementTopic}
+                  onChange={(e) => setPlacementTopic(e.target.value)}
+                  className="input-control"
+                />
+              </div>
+            )}
             <div style={{ marginBottom: "16px" }}>
               <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px" }}>Question</label>
               <textarea
@@ -368,7 +430,6 @@ function Admin() {
                 style={{ height: "100px" }}
               />
             </div>
- 
             <div style={{ marginBottom: "24px" }}>
               <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px" }}>Correct Answer / Hint</label>
               <textarea
@@ -449,5 +510,4 @@ function Admin() {
     </div>
   );
 }
-
 export default Admin;

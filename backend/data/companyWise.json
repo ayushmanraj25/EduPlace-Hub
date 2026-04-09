@@ -1,0 +1,110 @@
+[
+  {
+    "id": "1",
+    "company": "TCS",
+    "type": "Aptitude",
+    "question": "If a person sells an article at a profit of 25%, then find the ratio of CP to SP.",
+    "answer": "Let CP = 100. Profit = 25%. SP = 125. Ratio CP:SP = 100:125 = 4:5.",
+    "year": 2024,
+    "created_at": "2024-01-01T10:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "company": "Infosys",
+    "type": "Technical",
+    "question": "What is the difference between abstract class and interface in Java?",
+    "answer": "An abstract class can have both abstract and concrete methods, while an interface (before Java 8) could only have abstract methods. A class can implement multiple interfaces but extend only one abstract class.",
+    "year": 2024,
+    "created_at": "2024-01-02T10:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "company": "Wipro",
+    "type": "Coding",
+    "question": "Write a function to check if a string is a palindrome.",
+    "answer": "function isPalindrome(str) { return str === str.split('').reverse().join(''); }",
+    "year": 2025,
+    "created_at": "2025-01-03T10:00:00.000Z"
+  },
+  {
+    "id": "4",
+    "company": "Google",
+    "type": "System Design",
+    "question": "How would you design a URL shortener like bit.ly?",
+    "answer": "You need a load balancer, web servers, a database for mapping short IDs to long URLs, and a hashing algorithm (like Base62). Consider caching frequently accessed URLs with Redis.",
+    "year": 2025,
+    "created_at": "2025-01-04T10:00:00.000Z"
+  },
+  {
+    "id": "5",
+    "company": "Microsoft",
+    "type": "HR",
+    "question": "Tell me about a time you faced a difficult challenge and how you overcame it.",
+    "answer": "Should focus on using SITUATION, TASK, ACTION, RESULT (STAR) method.",
+    "year": 2024,
+    "created_at": "2024-01-05T10:00:00.000Z"
+  },
+  {
+    "company": "TCS",
+    "type": "Technical",
+    "question": "who r u?",
+    "answer": "i am jsfgkjwefgwg",
+    "year": 2026,
+    "created_at": "2026-04-09T15:44:34.697Z",
+    "id": "1775749475335"
+  },
+  {
+    "company": "Google",
+    "type": "Coding",
+    "question": "add two numbers",
+    "answer": "a + b;",
+    "year": 2026,
+    "created_at": "2026-04-09T16:04:15.365Z",
+    "id": "1775750655818"
+  },
+  {
+    "company": "TCS",
+    "type": "Technical",
+    "question": "jksfdjk",
+    "answer": "kjsdiug",
+    "year": 2026,
+    "created_at": "2026-04-09T16:08:00.369Z",
+    "id": "1775750881811"
+  },
+  {
+    "company": "TCS",
+    "type": "HR",
+    "question": "hello",
+    "answer": "haan",
+    "year": 2026,
+    "created_at": "2026-04-09T16:30:18.777Z",
+    "id": "1775752220367"
+  },
+  {
+    "company": "TCS",
+    "type": "Coding",
+    "question": "multiply two numbers",
+    "answer": "a * b",
+    "year": 2026,
+    "created_at": "2026-04-09T16:34:14.210Z",
+    "id": "1775752455158"
+  },
+  {
+    "company": "TCS",
+    "type": "Technical",
+    "question": "hello",
+    "answer": "sjgcwieufgwe",
+    "year": 2026,
+    "created_at": "2026-04-09T17:20:51.088Z",
+    "id": "1775755251443"
+  },
+  {
+    "company": "TCS",
+    "type": "Technical",
+    "question": "dsvdsjkn",
+    "answer": "sdvfbxvc v",
+    "year": 2026,
+    "created_at": "2026-04-09T17:32:28.452Z",
+    "id": "1775755949729"
+  }
+]

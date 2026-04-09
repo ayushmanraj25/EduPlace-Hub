@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NotificationPopup from "../components/NotificationPopup";
 
 function Home() {
   const [latestNotes, setLatestNotes] = useState([]);
@@ -126,7 +125,6 @@ function Home() {
           </p>
         </div>
       </section>
-      <NotificationPopup />
     </div>
   );
 }

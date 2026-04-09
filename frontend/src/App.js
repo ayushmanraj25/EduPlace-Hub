@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Subjects from "./pages/Subjects";
@@ -8,6 +8,10 @@ import Admin from "./pages/Admin";
 import AINotes from "./pages/AINotes";
 import CompanyWise from "./pages/CompanyWise";
 
+const ProtectedRoute = ({ element }) => {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  return user ? element : <Navigate to="/login" replace />;
+};
 
 function App() {
   return (
@@ -15,13 +19,12 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/subjects" element={<Subjects />} />
-        <Route path="/placement" element={<Placement />} />
-        <Route path="/company-wise" element={<CompanyWise />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/ai-notes" element={<AINotes />} />
-
+        <Route path="/subjects" element={<ProtectedRoute element={<Subjects />} />} />
+        <Route path="/placement" element={<ProtectedRoute element={<Placement />} />} />
+        <Route path="/company-wise" element={<ProtectedRoute element={<CompanyWise />} />} />
+        <Route path="/admin" element={<ProtectedRoute element={<Admin />} />} />
+        <Route path="/ai-notes" element={<ProtectedRoute element={<AINotes />} />} />
       </Routes>
     </BrowserRouter>
   );

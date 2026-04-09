@@ -1,43 +1,71 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabaseClient";
 
 function Login() {
+  const [isSignup, setIsSignup] = useState(false);
   const [role, setRole] = useState("user");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState(1); // 1: Email/Role, 2: OTP
+  const [step, setStep] = useState(1); // 1: Form, 2: OTP (Signup only)
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [recentAccounts, setRecentAccounts] = useState(() => {
-    return JSON.parse(localStorage.getItem("recentAccounts") || "[]");
-  });
-  
   const navigate = useNavigate();
 
-  const handleStep1 = async (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
-    if (!email) return;
-
+    if (!email || !password) return;
     setIsLoading(true);
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:5001/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, role })
-      });
+      if (isSignup) {
+        // Handle Signup
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { role }
+          }
+        });
+        
+        if (error) throw error;
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setStep(2);
-        setMessage("✅ OTP successfully dispatched to your inbox!");
+        if (data.session) {
+          // Email confirmations are disabled on Supabase, logged in directly
+          const user = {
+            email: data.user.email,
+            role: data.user.user_metadata?.role || "user",
+          };
+          localStorage.setItem("user", JSON.stringify(user));
+          setMessage("✅ Signup successful! Redirecting...");
+          setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/subjects"), 1500);
+        } else {
+          // OTP required
+          setStep(2);
+          setMessage("✅ Verification email sent! Enter the OTP.");
+        }
       } else {
-        setMessage("❌ " + (data.message || "Failed to send OTP"));
+        // Handle Login
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) throw error;
+
+        const user = {
+          email: data.user.email,
+          role: data.user.user_metadata?.role || "user",
+        };
+        localStorage.setItem("user", JSON.stringify(user));
+        setMessage("✅ Login successful! Redirecting...");
+        setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/subjects"), 1500);
       }
     } catch (error) {
-      setMessage("❌ Connection error.");
+      console.error("Auth Error:", error);
+      setMessage("❌ " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -51,90 +79,108 @@ function Login() {
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:5001/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp })
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'signup',
       });
 
-      const data = await response.json();
+      if (error) throw error;
 
-      if (response.ok) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        
-        const updatedRecent = [
-          { email, role },
-          ...recentAccounts.filter(acc => acc.email !== email)
-        ].slice(0, 3);
-        localStorage.setItem("recentAccounts", JSON.stringify(updatedRecent));
-
-        if (data.user.role === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/subjects");
-        }
-      } else {
-        setMessage("❌ " + (data.message || "Invalid OTP"));
-      }
+      const user = {
+        email: data.user.email,
+        role: data.user.user_metadata?.role || "user",
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      setMessage("✅ Verification successful! Redirecting...");
+      setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/subjects"), 1500);
     } catch (error) {
-      setMessage("❌ Connection error.");
+      console.error("Verify OTP Error:", error);
+      setMessage("❌ " + error.message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const switchAccount = (acc) => {
-    setEmail(acc.email);
-    setRole(acc.role);
-    setStep(1);
-    setOtp("");
-    setMessage("");
-  };
-
   return (
-    <div style={{ minHeight: "calc(100vh - 80px)", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px" }}>
+    <div className="page-container" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
       <div className="glass-panel animate-slide-up" style={{ padding: "40px", width: "100%", maxWidth: "400px" }}>
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
-          <h2 className="gradient-text" style={{ fontSize: "28px", marginBottom: "8px" }}>Welcome</h2>
-          <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>Enter your email to receive an OTP</p>
+          <h2 className="gradient-text" style={{ fontSize: "32px", marginBottom: "8px" }}>
+            {step === 2 ? "Verify Email" : (isSignup ? "Create Account" : "Welcome Back")}
+          </h2>
+          <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+            {step === 2 
+              ? "Enter the verification code sent to your email"
+              : (isSignup ? "Sign up to access study materials" : "Login to your account to continue")}
+          </p>
         </div>
 
         {message && (
-          <div style={{ padding: "12px", marginBottom: "20px", borderRadius: "8px", background: "var(--card-highlight)", color: message.includes("✅") ? "var(--success)" : "var(--danger)", fontSize: "13px", textAlign: "center" }}>
+          <div style={{ 
+            padding: "12px", 
+            marginBottom: "20px", 
+            borderRadius: "8px", 
+            background: "var(--card-highlight)", 
+            color: message.includes("✅") ? "var(--success)" : "var(--danger)", 
+            fontSize: "13px", 
+            textAlign: "center",
+            border: `1px solid ${message.includes("✅") ? "var(--success)" : "var(--danger)"}44`
+          }}>
             {message}
           </div>
         )}
 
-        {recentAccounts.length > 0 && step === 1 && (
-          <div style={{ marginBottom: "25px" }}>
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-              {recentAccounts.map((acc, i) => (
-                <div key={i} onClick={() => switchAccount(acc)} style={{ width: "36px", height: "36px", borderRadius: "50%", background: role === acc.role && email === acc.email ? "var(--accent-primary)" : "var(--card-highlight)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: "14px", fontWeight: "bold", color: "white" }}>
-                  {acc.email[0].toUpperCase()}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {step === 1 ? (
-          <form onSubmit={handleStep1} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} className="input-control" required />
-            <select value={role} onChange={(e) => setRole(e.target.value)} className="input-control">
-              <option value="user">Student</option>
-              <option value="admin">Admin</option>
-            </select>
-            <button type="submit" className="primary-btn" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Get OTP"}
+          <form onSubmit={handleAuth} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            <div>
+              <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "600", textTransform: "uppercase" }}>Email Address</label>
+              <input type="email" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="input-control" required />
+            </div>
+            <div>
+              <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "600", textTransform: "uppercase" }}>Password</label>
+              <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="input-control" minLength="6" required />
+            </div>
+            
+            {isSignup && (
+              <div>
+                <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "600", textTransform: "uppercase" }}>Role</label>
+                <select value={role} onChange={(e) => setRole(e.target.value)} className="input-control">
+                  <option value="user">Student</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            )}
+
+            <button type="submit" className="primary-btn" disabled={isLoading} style={{ marginTop: "10px" }}>
+              {isLoading ? "Processing..." : (isSignup ? "Sign Up" : "Login")}
             </button>
+
+            <div style={{ textAlign: "center", marginTop: "10px" }}>
+              <button type="button" onClick={() => {
+                setIsSignup(!isSignup);
+                setMessage("");
+                setPassword("");
+              }} style={{ background: "transparent", border: "none", color: "var(--text-muted)", fontSize: "13px", cursor: "pointer", textDecoration: "underline" }}>
+                {isSignup ? "Already have an account? Login" : "Don't have an account? Sign Up"}
+              </button>
+            </div>
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            <input type="text" placeholder="6-Digit OTP" value={otp} onChange={(e) => setOtp(e.target.value)} className="input-control" maxLength="6" style={{ textAlign: "center", letterSpacing: "5px" }} required />
+            <div>
+              <label style={{ display: "block", marginBottom: "8px", fontSize: "12px", color: "var(--text-muted)", fontWeight: "600", textTransform: "uppercase" }}>Verification Code</label>
+              <input type="text" placeholder="8-digit code" value={otp} onChange={(e) => setOtp(e.target.value)} className="input-control" maxLength="8" style={{ textAlign: "center", letterSpacing: "8px", fontSize: "20px" }} required />
+            </div>
             <button type="submit" className="primary-btn" disabled={isLoading}>
-              {isLoading ? "Verifying..." : "Login"}
+              {isLoading ? "Verifying..." : "Verify & Login"}
             </button>
-            <button type="button" onClick={() => setStep(1)} style={{ background: "transparent", border: "none", color: "var(--text-muted)", fontSize: "13px", cursor: "pointer" }}>Back to Email</button>
+            <button type="button" onClick={() => {
+              setStep(1);
+              setMessage("");
+            }} style={{ background: "transparent", border: "none", color: "var(--text-muted)", fontSize: "13px", cursor: "pointer", textDecoration: "underline" }}>
+              Back to Signup
+            </button>
           </form>
         )}
       </div>

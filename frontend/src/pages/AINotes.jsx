@@ -23,10 +23,10 @@ function AINotes() {
       if (response.ok) {
         setAnswer(data.notes);
       } else {
-        setAnswer(`⚠️ Error: ${data.message || "Failed to generate notes"}`);
+        setAnswer(`⚠️ Error: ${data.message || data.error || "Failed to generate notes"}`);
       }
     } catch (error) {
-      setAnswer("⚠️ Error: AI Service is offline.");
+      setAnswer(`⚠️ Error: Could not connect to the AI Service (${error.message}).`);
     } finally {
       setLoading(false);
     }

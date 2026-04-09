@@ -1,0 +1,9 @@
+// cd backend
+// npx nodemon server.js
+
+
+// cd frontend
+// npm start
+
+
+node backend/test-supabase.js

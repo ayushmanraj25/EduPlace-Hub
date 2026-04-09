@@ -1,11 +1,30 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { supabase } from "../supabaseClient";
 
 function Navbar() {
   const location = useLocation();
   const [hovered, setHovered] = useState(null);
   
   const isActive = (path) => location.pathname === path;
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+
+  const navLinks = [
+    { name: "Home", path: "/" },
+    ...(user ? [
+      { name: "Subjects", path: "/subjects" },
+      { name: "Placement", path: "/placement" },
+      { name: "Company Wise", path: "/company-wise" },
+      { name: "AI Notes", path: "/ai-notes" },
+    ] : [])
+  ];
 
   return (
     <nav className="glass-panel" style={{ 
@@ -17,10 +36,7 @@ function Navbar() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderTopLeftRadius: '16px',
-        borderTopRightRadius: '16px',
-        borderBottomLeftRadius: '16px',
-        borderBottomRightRadius: '16px'
+        borderRadius: '16px'
     }}>
       <Link to="/" style={{ textDecoration: 'none' }}>
         <h2 className="gradient-text" style={{ margin: 0, fontSize: '24px', letterSpacing: '-0.5px' }}>
@@ -36,12 +52,7 @@ function Navbar() {
           padding: 0, 
           alignItems: 'center' 
       }}>
-        {[
-          { name: "Home", path: "/" },
-          { name: "Subjects", path: "/subjects" },
-          { name: "Placement", path: "/placement" },
-          { name: "AI Notes", path: "/ai-notes" },
-        ].map((item, index) => (
+        {navLinks.map((item, index) => (
           <li key={index}>
             <Link
               to={item.path}
@@ -66,51 +77,33 @@ function Navbar() {
             </Link>
           </li>
         ))}
-        {localStorage.getItem("user") ? (
+        {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-            <div style={{ 
-              width: "42px", 
-              height: "42px", 
-              borderRadius: "50%", 
-              background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              fontWeight: "bold",
-              fontSize: "18px",
-              boxShadow: "0 4px 15px rgba(59, 130, 246, 0.3)",
-              border: "2px solid rgba(255, 255, 255, 0.2)",
-              cursor: "pointer"
-            }}>
-              {JSON.parse(localStorage.getItem("user")).email[0].toUpperCase()}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--text-primary)" }}>
-                {JSON.parse(localStorage.getItem("user")).email.split("@")[0]}
-              </span>
-              <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                {JSON.parse(localStorage.getItem("user")).role}
-              </span>
-            </div>
-            <button
-              onClick={() => {
-                localStorage.removeItem("user");
-                window.location.reload();
+            <Link 
+              to={user.role === "admin" ? "/admin" : "/subjects"} 
+              style={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                textAlign: "right", 
+                textDecoration: "none",
+                transition: "opacity 0.2s ease"
               }}
-              style={{
-                background: "rgba(239, 68, 68, 0.1)",
-                border: "1px solid rgba(239, 68, 68, 0.2)",
-                color: "#ef4444",
-                padding: "6px 12px",
-                borderRadius: "6px",
-                fontSize: "12px",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "all 0.2s ease"
-              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
             >
-              Sign Out
+              <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--text-primary)" }}>
+                {user.email.split("@")[0]}
+              </span>
+              <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase" }}>
+                {user.role}
+              </span>
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="secondary-btn"
+              style={{ padding: "6px 12px", fontSize: "12px", border: "1px solid var(--danger)", color: "var(--danger)" }}
+            >
+              Logout
             </button>
           </div>
         ) : (
