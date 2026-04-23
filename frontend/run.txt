@@ -1,3 +1,14 @@
+
+// Ye commands project run karne ke liye hain (frontend + backend start karne ke liye)
+
+// cd backend → backend folder me jaane ke liye
+// npx nodemon server.js → backend server start karta hai aur changes pe auto-restart hota hai
+
+// cd frontend → frontend (React app) folder me jaane ke liye
+// npm start → React app ko browser me run karta hai (localhost:3000)
+
+
+
 // cd backend
 // npx nodemon server.js
 

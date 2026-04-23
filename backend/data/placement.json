@@ -16,5 +16,25 @@
     "user_id": "ayushmanraj430@gmail.com",
     "created_at": "2026-04-09T17:25:38.834Z",
     "id": "1775755540315"
+  },
+  {
+    "category": "Technical – DSA",
+    "topic": "stack",
+    "question": "what is stack",
+    "answer": "it is a fifo",
+    "company": null,
+    "user_id": "ayushmanraj430@gmail.com",
+    "created_at": "2026-04-10T04:34:56.857Z",
+    "id": "1775795707383"
+  },
+  {
+    "category": "Aptitude",
+    "topic": "Math",
+    "question": "2+2",
+    "answer": "4",
+    "company": null,
+    "user_id": "test@test.com",
+    "created_at": "2026-04-23T16:50:19.038Z",
+    "id": "1776963019044"
   }
 ]

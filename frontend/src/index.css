@@ -1,37 +1,36 @@
 /* =========================================
-   GLOBAL CSS VARIABLES & TOKENS (LIGHT SAAS THEME)
+   GLOBAL CSS VARIABLES & TOKENS (ZEN GREEN SAAS)
    ========================================= */
 :root {
-  /* Color Palette - Premium Startup Light Mode */
-  --bg-primary: #F9FAFB;      /* Tailwind Gray 50 */
-  --bg-secondary: #FFFFFF;    /* Pure White */
-  --bg-tertiary: #F3F4F6;     /* Tailwind Gray 100 */
+  /* Color Palette - Clean & Fresh */
+  --bg-primary: #E9F2EC;      /* Very light pale mint/green tint */
+  --bg-secondary: #FFFFFF;    /* Pure White Cards */
+  --bg-tertiary: #F9FAFB;     /* Soft Hover Background */
 
-  --text-primary: #111827;    /* Tailwind Gray 900 */
-  --text-secondary: #4B5563;  /* Tailwind Gray 600 */
-  --text-muted: #9CA3AF;      /* Tailwind Gray 400 */
+  --text-primary: #1F2937;    /* Deep Gray/Black */
+  --text-secondary: #4B5563;  /* Medium Gray */
+  --text-muted: #9CA3AF;      /* Light Gray */
 
-  /* Vibrant Coral & Sunset Gradients */
-  --accent-primary: #FF3366;  /* Vibrant Coral */
-  --accent-secondary: #FF7733; /* Bright Sunset Orange */
-  --accent-hover: #E62958;
+  /* Forest & Mint Green */
+  --accent-primary: #2B6D4C;  /* Deep Forest Green */
+  --accent-secondary: #5AB27E; /* Soft Mint Green */
+  --accent-hover: #1D4D34;    /* Darker Forest Green */
   
   --danger: #EF4444;
   --success: #10B981;
   --warning: #F59E0B;
 
-  /* Glassmorphism Variables for Light Mode */
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(229, 231, 235, 0.8); /* Gray 200 */
-  --glass-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0,0,0,0.04);
-  --backdrop-blur: blur(16px);
+  /* Card Variables */
+  --glass-bg: #FFFFFF;
+  --glass-border: #E5E7EB; /* Subtle light gray border */
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.03), 0 2px 5px rgba(0,0,0,0.02);
+  --backdrop-blur: blur(0px); /* Clean solid background */
   
-  /* Additional tokens replacing hardcoded values */
-  --card-highlight: rgba(0, 0, 0, 0.02);
-  --card-highlight-border: rgba(0, 0, 0, 0.05);
+  --card-highlight: rgba(43, 109, 76, 0.03);
+  --card-highlight-border: rgba(43, 109, 76, 0.1);
 
   /* Fonts */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
     sans-serif;
 }
@@ -48,9 +47,8 @@
 body {
   font-family: var(--font-family);
   background-color: var(--bg-primary);
-  /* Soft, elegant radial gradients to mimic standard premium startup websites */
-  background-image: radial-gradient(circle at 15% 50%, rgba(255, 51, 102, 0.06), transparent 30%),
-                    radial-gradient(circle at 85% 30%, rgba(255, 119, 51, 0.06), transparent 30%);
+  /* Pure clean solid color for Zen dashboard look */
+  background-image: none;
   color: var(--text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -104,30 +102,27 @@ button {
 
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
-  border-radius: 16px;
+  border-radius: 20px; /* Softer edges */
+  transition: all 0.2s ease;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  /* Clean solid styling for dashboard matching reference */
+  color: var(--accent-primary);
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: var(--accent-primary);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 12px 28px;
+  border-radius: 50px; /* Pill shape */
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -135,8 +130,9 @@ button {
 }
 
 .primary-btn:hover {
+  background: var(--accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+  box-shadow: 0 4px 12px rgba(43, 109, 76, 0.2);
 }
 
 .primary-btn:active {
@@ -151,19 +147,17 @@ button {
 }
 
 .secondary-btn {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--glass-border);
-  padding: 12px 24px;
-  border-radius: 8px;
+  background: transparent;
+  color: var(--accent-primary);
+  border: 1.5px solid var(--accent-primary);
+  padding: 11px 28px;
+  border-radius: 50px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .secondary-btn:hover {
-  background: var(--bg-tertiary);
-  border-color: #D1D5DB; /* Gray 300 */
+  background: var(--card-highlight);
 }
 
 /* Form Controls */
@@ -246,4 +240,23 @@ select.input-control option {
   margin: 0 auto;
   min-height: calc(100vh - 70px);
   animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes floatMockup {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
+}
+
+.floating-mockup {
+  animation: floatMockup 6s ease-in-out infinite;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

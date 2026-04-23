@@ -14,3 +14,5 @@ const supabase = (supabaseUrl && supabaseAnonKey)
   : null;
 
 module.exports = supabase;
+
+

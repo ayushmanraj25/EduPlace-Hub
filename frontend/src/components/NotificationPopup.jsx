@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from "react";
+// Ye component bottom-right me live notification popups show karta hai (notes, placement, AI updates)
+// setInterval se har 4 sec me new notification add hoti hai (real-time jaisa effect)
+// Max 3 notifications display hoti hain aur animation + styling ke saath UI me dikhti hain
 
+import React, { useState, useEffect } from "react";
 const NotificationPopup = () => {
   const [notifications, setNotifications] = useState([]);
 
@@ -11,7 +14,6 @@ const NotificationPopup = () => {
       { id: 3, type: "ai", content: "Neural Net synthesized 'B-Tree' summary" },
       { id: 4, type: "user", content: "Student logged in from University IP" },
     ];
-
     let count = 0;
     const interval = setInterval(() => {
       const activity = activities[count % activities.length];
@@ -72,5 +74,4 @@ const NotificationPopup = () => {
     </div>
   );
 };
-
 export default NotificationPopup;

@@ -22,6 +22,7 @@ app.use("/api/notes", noteRoutes);
 const aiRoutes = require("./routes/aiRoutes");
 app.use("/api/ai", aiRoutes);
 
+
 const placementRoutes = require("./routes/placementRoutes");
 app.use("/api/placement", placementRoutes);
 
@@ -41,4 +42,20 @@ app.listen(PORT, () => {
 
 
 // cd frontend
-// npm start
+
+// ✅ Auto-Wakeup Supabase (Only works if project is Active, not Paused)
+const supabase = require("./config/supabase");
+
+(async () => {
+  try {
+    console.log("Checking Supabase connection...");
+    const { error } = await supabase.from("notes").select("id").limit(1);
+    if (error) {
+      console.warn("Supabase ping warning:", error.message);
+    } else {
+      console.log("Supabase is connected and ready ✅");
+    }
+  } catch (err) {
+    console.error("Supabase connection failed! (Please check if Project is Paused on Supabase Dashboard):", err.message);
+  }
+})();

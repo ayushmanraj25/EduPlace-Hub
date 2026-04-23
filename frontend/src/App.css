@@ -1,3 +1,6 @@
+/* Ye default React CSS hai jo app ka basic layout aur styling set karta hai (center alignment, header design) */
+/* App-logo ko rotate animation deta hai (React ka spinning logo effect) */
+/* Mostly starter template ke liye hai — real project me isko customize ya remove kar dete hain */
 .App {
   text-align: center;
 }

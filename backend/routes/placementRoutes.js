@@ -32,11 +32,15 @@ router.get("/", async (req, res) => {
   try {
     const { category } = req.query;
     if (isSupabaseConfigured()) {
-      let query = supabase.from("placement_questions").select("*");
-      if (category) query = query.eq("category", category);
-      const { data, error } = await query.order("created_at", { ascending: false });
-      if (!error) return res.json(data);
-      console.error("Supabase GET error:", error.message);
+      try {
+        let query = supabase.from("placement_questions").select("*");
+        if (category) query = query.eq("category", category);
+        const { data, error } = await query.order("created_at", { ascending: false });
+        if (!error) return res.json(data);
+        console.error("Supabase GET error:", error.message);
+      } catch (err) {
+        console.error("Supabase Exception:", err.message);
+      }
     }
     let local = readLocal();
     if (category) local = local.filter(q => q.category === category);
@@ -52,14 +56,18 @@ router.get("/company/:company", async (req, res) => {
   try {
     const { company } = req.params;
     if (isSupabaseConfigured()) {
-      const { data, error } = await supabase
-        .from("placement_questions")
-        .select("*")
-        .eq("category", "Company Wise")
-        .ilike("company", company)
-        .order("created_at", { ascending: false });
-      if (!error) return res.json(data);
-      console.error("Supabase company GET error:", error.message);
+      try {
+        const { data, error } = await supabase
+          .from("placement_questions")
+          .select("*")
+          .eq("category", "Company Wise")
+          .ilike("company", company)
+          .order("created_at", { ascending: false });
+        if (!error) return res.json(data);
+        console.error("Supabase company GET error:", error.message);
+      } catch (err) {
+        console.error("Supabase Exception:", err.message);
+      }
     }
     // Fallback to local JSON
     let local = readLocal();
@@ -75,14 +83,18 @@ router.get("/company/:company", async (req, res) => {
 router.get("/companies", async (req, res) => {
   try {
     if (isSupabaseConfigured()) {
-      const { data, error } = await supabase
-        .from("placement_questions")
-        .select("company")
-        .eq("category", "Company Wise")
-        .not("company", "is", null);
-      if (!error) {
-        const unique = [...new Set(data.map(d => d.company))];
-        return res.json(unique);
+      try {
+        const { data, error } = await supabase
+          .from("placement_questions")
+          .select("company")
+          .eq("category", "Company Wise")
+          .not("company", "is", null);
+        if (!error) {
+          const unique = [...new Set(data.map(d => d.company))];
+          return res.json(unique);
+        }
+      } catch (err) {
+        console.error("Supabase Exception:", err.message);
       }
     }
     let local = readLocal();
@@ -144,5 +156,4 @@ router.post("/add", async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
-
 module.exports = router;

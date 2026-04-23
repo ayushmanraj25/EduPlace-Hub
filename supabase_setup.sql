@@ -1,7 +1,4 @@
--- 🚀 FINAL FIX: Run this in Supabase SQL Editor
--- This fixes "permission denied" errors once and for all
 
--- Step 1: GRANT full access to anon and authenticated roles
 GRANT ALL ON TABLE public.users TO anon;
 GRANT ALL ON TABLE public.users TO authenticated;
 

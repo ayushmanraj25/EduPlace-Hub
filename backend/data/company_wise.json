@@ -1,0 +1,164 @@
+[
+  {
+    "company": "Google",
+    "type": "Technical",
+    "question": "2+2",
+    "answer": "4",
+    "year": 2026,
+    "created_at": "2026-04-23T16:51:43.503Z",
+    "id": "1776963103526"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Q1. Two Sum\n\nGiven an array of integers and a target value, return the indices of two numbers such that they add up to the target.\n\nQ2. Maximum Subarray Sum\n\nGiven an integer array, find the contiguous subarray with the largest sum and return its sum.\n\nQ3. Leaders in Array\n\nGiven an array, find all elements that are greater than all elements to their right.\n\nQ4. Valid Parentheses\n\nGiven a string containing only ‘( ) { } [ ]’, determine if the string is valid (balanced).\n\nQ5. Rotate Array by K\n\nGiven an array, rotate it to the right by k steps.\n\nQ6. Longest Common Prefix\n\nGiven an array of strings, find the longest common prefix string.\n\nQ7. Missing Number\n\nGiven an array containing n distinct numbers from 0 to n, find the one number missing.\n\nQ8. Palindrome Check\n\nGiven a string, check if it is a palindrome.\n\nQ9. Count Vowels\n\nGiven a string, count the number of vowels present.\n\nQ10. Minimum Platforms\n\nGiven arrival and departure times of trains, find the minimum number of platforms required.\n\nQ11. Frequency of Elements\n\nGiven an array, print the frequency of each element.\n\nQ12. Second Largest Element\n\nFind the second largest element in an array.\n\nQ13. Remove Duplicates (Sorted Array)\n\nRemove duplicates from a sorted array and return the new length.\n\nQ14. Anagram Check\n\nGiven two strings, check whether they are anagrams.\n\nQ15. First Non-Repeating Character\n\nFind the first character in a string that does not repeat.",
+    "answer": "H1.\n\nThink about storing elements you have already seen. For each element, check if its required pair already exists.\n\nH2.\n\nIf the running sum becomes negative, it won’t help in future—restart from next element.\n\nH3.\n\nTraverse the array from the end and keep track of the maximum seen so far.\n\nH4.\n\nUse a data structure that follows Last-In-First-Out. Match closing brackets with the most recent opening.\n\nH5.\n\nAvoid shifting elements repeatedly. Instead, reverse parts of the array in steps.\n\nH6.\n\nSorting the array of strings can simplify comparison. Only compare the first and last strings.\n\nH7.\n\nUse the mathematical sum formula or XOR approach to find the missing value.\n\nH8.\n\nUse two pointers: one from the beginning and one from the end, and compare characters.\n\nH9.\n\nCheck each character against a predefined set of vowels. Don’t forget uppercase letters.\n\nH10.\n\nSort both arrival and departure arrays. Use two pointers to simulate platform usage.\n\nH11.\n\nUse a hashmap/dictionary to count occurrences efficiently.\n\nH12.\n\nKeep track of the largest and second largest values in a single traversal.\n\nH13.\n\nUse two pointers—one to track unique elements, another to iterate through the array.\n\nH14.\n\nCompare character counts of both strings or sort them and compare results.\n\nH15.\n\nFirst store frequency of each character, then find the first one with count = 1.",
+    "year": 2026,
+    "created_at": "2026-04-23T16:53:18.762Z",
+    "id": "1776963198811"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Q1. Two Sum\n\nGiven an array of integers and a target value, return the indices of two numbers such that they add up to the target.\n\nQ2. Maximum Subarray Sum\n\nGiven an integer array, find the contiguous subarray with the largest sum and return its sum.\n\nQ3. Leaders in Array\n\nGiven an array, find all elements that are greater than all elements to their right.",
+    "answer": "H1.\n\nThink about storing elements you have already seen. For each element, check if its required pair already exists.\n\nH2.\n\nIf the running sum becomes negative, it won’t help in future—restart from next element.\n\nH3.\n\nTraverse the array from the end and keep track of the maximum seen so far.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:12:05.873Z",
+    "id": "1776964325923"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Two Sum\n\nGiven an array of integers and a target value, return the indices of two numbers such that they add up to the target.",
+    "answer": "Think about storing elements you have already seen. For each element, check if its required pair already exists.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.603Z",
+    "id": "1776965249609"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Maximum Subarray Sum\n\nGiven an integer array, find the contiguous subarray with the largest sum and return its sum.",
+    "answer": "If the running sum becomes negative, it won’t help in future—restart from next element.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.613Z",
+    "id": "1776965249616"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Leaders in Array\n\nGiven an array, find all elements that are greater than all elements to their right.",
+    "answer": "Traverse the array from the end and keep track of the maximum seen so far.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.619Z",
+    "id": "1776965249621"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Valid Parentheses\n\nGiven a string containing only ‘( ) { } [ ]’, determine if the string is valid (balanced).",
+    "answer": "Use a data structure that follows Last-In-First-Out. Match closing brackets with the most recent opening.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.624Z",
+    "id": "1776965249627"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Rotate Array by K\n\nGiven an array, rotate it to the right by k steps.",
+    "answer": "Avoid shifting elements repeatedly. Instead, reverse parts of the array in steps.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.630Z",
+    "id": "1776965249632"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Longest Common Prefix\n\nGiven an array of strings, find the longest common prefix string.",
+    "answer": "Sorting the array of strings can simplify comparison. Only compare the first and last strings.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.636Z",
+    "id": "1776965249638"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Missing Number\n\nGiven an array containing n distinct numbers from 0 to n, find the one number missing.",
+    "answer": "Use the mathematical sum formula or XOR approach to find the missing value.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.641Z",
+    "id": "1776965249644"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Palindrome Check\n\nGiven a string, check if it is a palindrome.",
+    "answer": "Use two pointers: one from the beginning and one from the end, and compare characters.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.648Z",
+    "id": "1776965249651"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Count Vowels\n\nGiven a string, count the number of vowels present.",
+    "answer": "Check each character against a predefined set of vowels. Don’t forget uppercase letters.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.654Z",
+    "id": "1776965249656"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Minimum Platforms\n\nGiven arrival and departure times of trains, find the minimum number of platforms required.",
+    "answer": "Sort both arrival and departure arrays. Use two pointers to simulate platform usage.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.659Z",
+    "id": "1776965249661"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Frequency of Elements\n\nGiven an array, print the frequency of each element.",
+    "answer": "Use a hashmap/dictionary to count occurrences efficiently.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.664Z",
+    "id": "1776965249666"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Second Largest Element\n\nFind the second largest element in an array.",
+    "answer": "Keep track of the largest and second largest values in a single traversal.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.669Z",
+    "id": "1776965249671"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Remove Duplicates (Sorted Array)\n\nRemove duplicates from a sorted array and return the new length.",
+    "answer": "Use two pointers—one to track unique elements, another to iterate through the array.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.673Z",
+    "id": "1776965249675"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "Anagram Check\n\nGiven two strings, check whether they are anagrams.",
+    "answer": "Compare character counts of both strings or sort them and compare results.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.678Z",
+    "id": "1776965249680"
+  },
+  {
+    "company": "Infosys",
+    "type": "Coding",
+    "question": "First Non-Repeating Character\n\nFind the first character in a string that does not repeat.",
+    "answer": "First store frequency of each character, then find the first one with count = 1.",
+    "year": 2026,
+    "created_at": "2026-04-23T17:27:29.682Z",
+    "id": "1776965249684"
+  }
+]
