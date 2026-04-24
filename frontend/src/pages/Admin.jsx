@@ -3,6 +3,8 @@ import TextNoteForm from "../components/admin/TextNoteForm";
 import FileUploadForm from "../components/admin/FileUploadForm";
 import PlacementForm from "../components/admin/PlacementForm";
 import SessionActivity from "../components/admin/SessionActivity";
+import PendingApprovals from "../components/admin/PendingApprovals";
+import CodingAdmin from "../components/admin/CodingAdmin";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 function Admin() {
   const [notesList, setNotesList] = useState([]);
@@ -46,9 +48,9 @@ function Admin() {
             </div>
           </div>
         </div>
-        <div style={{ flex: '3 1 400px' }}>
+        <div style={{ flex: '3 1 400px', minWidth: 0 }}>
           <h3 style={{ fontSize: "16px", color: "var(--text-secondary)", marginBottom: "16px", fontWeight: "600" }}>Weekly Engagement Overview</h3>
-          <div style={{ width: '100%', height: '300px' }}>
+          <div style={{ width: '100%', height: '300px', minWidth: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={[
                 { name: 'Mon', users: 120, quizzes: 45 },
@@ -70,6 +72,9 @@ function Admin() {
           </div>
         </div>
       </div>
+
+      <PendingApprovals />
+
       <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
         {/* LEFT COLUMN: FORMS */}
         <div style={{ flex: "1 1 420px", display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -96,6 +101,13 @@ function Admin() {
             >
               Q&A
             </button>
+            <button 
+              type="button"
+              onClick={() => setActiveTab("coding")}
+              style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "none", background: activeTab === "coding" ? "#8B5CF6" : "transparent", color: activeTab === "coding" ? "#fff" : "var(--text-secondary)", fontWeight: activeTab === "coding" ? "600" : "500", cursor: "pointer", transition: "all 0.2s" }}
+            >
+              Coding
+            </button>
           </div>
 
           {activeTab === "text" && (
@@ -108,6 +120,10 @@ function Admin() {
  
           {activeTab === "placement" && (
             <PlacementForm user={user} setNotesList={setNotesList} />
+          )}
+
+          {activeTab === "coding" && (
+            <CodingAdmin user={user} />
           )}
         </div>
 

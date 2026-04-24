@@ -57,7 +57,7 @@ function Login() {
         };
         localStorage.setItem("user", JSON.stringify(user));
         setMessage("✅ Account logic complete! Dev-login active...");
-        setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/subjects"), 1500);
+        setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/dashboard"), 1500);
       } else {
         // Handle Login
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -71,7 +71,7 @@ function Login() {
           const devUser = { email, role: email.includes("admin") ? "admin" : "user" };
           localStorage.setItem("user", JSON.stringify(devUser));
           setMessage("✅ Login successful (Dev Bypass)! Redirecting...");
-          setTimeout(() => navigate(devUser.role === "admin" ? "/admin" : "/subjects"), 1500);
+          setTimeout(() => navigate(devUser.role === "admin" ? "/admin" : "/dashboard"), 1500);
           return;
         }
 
@@ -81,7 +81,7 @@ function Login() {
         };
         localStorage.setItem("user", JSON.stringify(user));
         setMessage("✅ Login successful! Redirecting...");
-        setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/subjects"), 1500);
+        setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/dashboard"), 1500);
       }
     } catch (error) {
       console.error("Auth Error:", error);
@@ -113,7 +113,7 @@ function Login() {
       };
       localStorage.setItem("user", JSON.stringify(user));
       setMessage("✅ Verification successful! Redirecting...");
-      setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/subjects"), 1500);
+      setTimeout(() => navigate(user.role === "admin" ? "/admin" : "/dashboard"), 1500);
     } catch (error) {
       console.error("Verify OTP Error:", error);
       setMessage("❌ " + error.message);

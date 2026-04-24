@@ -65,15 +65,33 @@ const upload = multer({
     }
   }
 });
+// Helper to save to pending queue
+const PENDING_FILE = path.join(__dirname, "..", "data", "pending.json");
+function readPending() {
+  try {
+    if (fs.existsSync(PENDING_FILE)) {
+      return JSON.parse(fs.readFileSync(PENDING_FILE, "utf-8"));
+    }
+  } catch (e) {}
+  return [];
+}
+function writePending(data) {
+  const dir = path.dirname(PENDING_FILE);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(PENDING_FILE, JSON.stringify(data, null, 2));
+}
+
 // POST /api/notes/add - Add a text note
 router.post("/add", async (req, res) => {
   try {
-    const { subject, topic, content, userId } = req.body;
+    const { subject, topic, content, userId, role } = req.body;
     if (!subject || !topic || !content) {
       return res.status(400).json({ message: "All fields are required" });
     }
+
     const newNote = {
       id: Date.now().toString(),
+      type: "note",
       subject,
       topic,
       content,
@@ -81,29 +99,32 @@ router.post("/add", async (req, res) => {
       created_at: new Date().toISOString()
     };
 
-    try {
-      console.log("Saving note to Supabase...");
-      const { data, error } = await supabase
-        .from('notes')
-        .insert([{ subject, topic, content, user_id: userId || 'anonymous' }])
-        .select();
+    if (role === "admin") {
+      try {
+        console.log("Admin uploading: Saving directly to Supabase...");
+        const { data, error } = await supabase
+          .from('notes')
+          .insert([{ subject, topic, content, user_id: userId || 'anonymous' }])
+          .select();
 
-      if (!error && data && data.length > 0) {
-        console.log("Note saved to Supabase ✅");
-        return res.status(201).json({ message: "Note saved successfully!", note: mapNote(data[0]) });
-      }
-      console.error("Supabase save error:", error ? error.message : "unknown");
-    } catch (err) {
-      console.error("Supabase Exception:", err.message);
+        if (!error && data && data.length > 0) {
+          return res.status(201).json({ message: "Note saved directly to database!", note: mapNote(data[0]) });
+        }
+      } catch (err) {}
+    } else {
+      console.log("User uploading: Sending to pending queue...");
+      const pending = readPending();
+      pending.push(newNote);
+      writePending(pending);
+      return res.status(201).json({ message: "Note submitted for admin approval! ⏳", note: newNote });
     }
     
-    console.log("Falling back to local storage for note...");
+    // Fallback if admin insert failed
     const local = readLocal();
     local.push(newNote);
     writeLocal(local);
-    res.status(201).json({ message: "Note saved locally! (Supabase failed)", note: mapNote(newNote) });
+    res.status(201).json({ message: "Note saved locally!", note: mapNote(newNote) });
   } catch (error) {
-    console.error("Save error:", error);
     res.status(500).json({ message: "Server Error: " + error.message });
   }
 });
@@ -113,13 +134,15 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded." });
     }
-    const { subject, topic, userId } = req.body;
+    const { subject, topic, userId, role } = req.body;
     if (!subject || !topic) {
       return res.status(400).json({ message: "Subject and Topic are required." });
     }
     const fileUrl = "/uploads/" + req.file.filename;
+    
     const newNote = {
       id: Date.now().toString(),
+      type: "file",
       subject,
       topic,
       user_id: userId || 'anonymous',
@@ -130,41 +153,39 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       created_at: new Date().toISOString()
     };
 
-    try {
-      console.log("Saving file record to Supabase...");
-      const { data, error } = await supabase
-        .from('notes')
-        .insert([{
-          subject,
-          topic,
-          user_id: userId,
-          content: `[File Upload] ${req.file.originalname}`,
-          file_url: fileUrl,
-          file_name: req.file.originalname,
-          file_size: req.file.size,
-        }])
-        .select();
+    if (role === "admin") {
+      try {
+        console.log("Admin uploading file: Saving to Supabase...");
+        const { data, error } = await supabase
+          .from('notes')
+          .insert([{
+            subject, topic, user_id: userId || 'anonymous',
+            content: `[File Upload] ${req.file.originalname}`,
+            file_url: fileUrl, file_name: req.file.originalname, file_size: req.file.size
+          }]).select();
 
-      if (!error && data && data.length > 0) {
-        console.log("File record saved to Supabase ✅");
-        return res.status(201).json({ message: "File uploaded successfully!", note: mapNote(data[0]) });
-      }
-      console.error("Supabase upload save error:", error ? error.message : "unknown");
-    } catch (err) {
-      console.error("Supabase Exception:", err.message);
+        if (!error && data && data.length > 0) {
+          return res.status(201).json({ message: "File uploaded successfully!", note: mapNote(data[0]) });
+        }
+      } catch (err) {}
+    } else {
+      console.log("User uploading file: Sending to pending queue...");
+      const pending = readPending();
+      pending.push(newNote);
+      writePending(pending);
+      return res.status(201).json({ message: "File submitted for admin approval! ⏳", note: newNote });
     }
 
-    console.log("Falling back to local storage for file note...");
     const local = readLocal();
     local.push(newNote);
     writeLocal(local);
-    res.status(201).json({ message: "File uploaded locally! (Supabase failed)", note: mapNote(newNote) });
+    res.status(201).json({ message: "File uploaded locally!", note: mapNote(newNote) });
   } catch (error) {
-    console.error("Upload error:", error);
     res.status(500).json({ message: "Upload failed: " + error.message });
   }
 });
-// GET /api/notes - Get all notes
+
+// GET /api/notes - Get notes
 router.get("/", async (req, res) => {
   try {
     try {
@@ -175,20 +196,39 @@ router.get("/", async (req, res) => {
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        console.log(`Fetched ${data.length} notes from Supabase ✅`);
         return res.json(data.map(mapNote));
       }
-      console.error("Supabase read error:", error ? error.message : "unknown");
-    } catch (err) {
-      console.error("Supabase Exception:", err.message);
-    }
+    } catch (err) {}
 
-    console.log("Falling back to local storage for notes...");
     const local = readLocal();
     res.json(local.reverse().map(mapNote));
   } catch (error) {
-    console.error("Server error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });
+
+// GET /api/notes/user/:userId - Get notes uploaded by a specific user
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    try {
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        return res.json(data.map(mapNote));
+      }
+    } catch (err) {}
+
+    let local = readLocal();
+    local = local.filter(n => n.user_id === userId);
+    res.json(local.reverse().map(mapNote));
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 module.exports = router;

@@ -25,7 +25,7 @@ router.post("/generate", async (req, res) => {
     // model select (fast + cheap)
     
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
 
     const systemPrompt = `You are an intelligent, helpful, and conversational AI assistant for a student platform called EduPlace-Hub. 
     User query: "{prompt}"

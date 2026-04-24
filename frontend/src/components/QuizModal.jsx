@@ -8,6 +8,7 @@ function QuizModal({ subject, isOpen, onClose }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [error, setError] = useState(null);
+  const [userAnswers, setUserAnswers] = useState([]);
 
   if (!isOpen) return null;
 
@@ -45,6 +46,7 @@ function QuizModal({ subject, isOpen, onClose }) {
           setScore(0);
           setShowResult(false);
           setSelectedAnswer(null);
+          setUserAnswers([]);
         } catch (parseErr) {
           console.error("Parse Error:", parseErr, data.notes);
           setError("AI returned malformed questions. Try again.");
@@ -66,10 +68,18 @@ function QuizModal({ subject, isOpen, onClose }) {
   };
 
   const handleNext = () => {
-    if (selectedAnswer === questions[currentStep].answer) {
+    const isCorrect = selectedAnswer === questions[currentStep].answer;
+    if (isCorrect) {
       setScore(s => s + 1);
     }
     
+    setUserAnswers(prev => [...prev, {
+      question: questions[currentStep].q,
+      selected: selectedAnswer,
+      correct: questions[currentStep].answer,
+      isCorrect: isCorrect
+    }]);
+
     if (currentStep < questions.length - 1) {
       setCurrentStep(c => c + 1);
       setSelectedAnswer(null);
@@ -77,7 +87,7 @@ function QuizModal({ subject, isOpen, onClose }) {
       setShowResult(true);
       // Save score to local storage
       const history = JSON.parse(localStorage.getItem("quiz_scores") || "{}");
-      history[subject] = (history[subject] || []).concat({ date: new Date().toLocaleDateString(), score: score + (selectedAnswer === questions[currentStep].answer ? 1 : 0), total: questions.length });
+      history[subject] = (history[subject] || []).concat({ date: new Date().toLocaleDateString(), score: score + (isCorrect ? 1 : 0), total: questions.length });
       localStorage.setItem("quiz_scores", JSON.stringify(history));
     }
   };
@@ -125,9 +135,31 @@ function QuizModal({ subject, isOpen, onClose }) {
                 {score >= 4 ? '🏆' : score >= 2 ? '👍' : '📚'}
               </div>
               <h3 style={{ fontSize: '24px', color: 'var(--text-primary)', marginBottom: '8px' }}>Quiz Complete!</h3>
-              <p style={{ fontSize: '18px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+              <p style={{ fontSize: '18px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                 You scored <strong style={{ color: 'var(--accent-primary)' }}>{score}</strong> out of {questions.length}.
               </p>
+              
+              <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '24px', textAlign: 'left' }}>
+                {userAnswers.map((ans, idx) => (
+                  <div key={idx} style={{ 
+                    marginBottom: '12px', padding: '16px', background: 'var(--bg-secondary)', 
+                    borderRadius: '8px', borderLeft: ans.isCorrect ? '4px solid #10B981' : '4px solid #EF4444' 
+                  }}>
+                    <div style={{ fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px' }}>
+                      Q{idx + 1}: {ans.question}
+                    </div>
+                    <div style={{ fontSize: '14px', color: ans.isCorrect ? '#10B981' : '#EF4444', marginBottom: '4px' }}>
+                      Your Answer: {ans.selected} {ans.isCorrect ? '✓' : '✗'}
+                    </div>
+                    {!ans.isCorrect && (
+                      <div style={{ fontSize: '14px', color: '#10B981' }}>
+                        Correct Answer: {ans.correct}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button className="secondary-btn" onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: '8px' }}>Close</button>
                 <button className="primary-btn" onClick={startQuiz} style={{ flex: 1, padding: '12px', borderRadius: '8px' }}>Take Another</button>

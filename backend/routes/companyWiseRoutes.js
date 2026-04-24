@@ -62,39 +62,69 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Helper to save to pending queue
+const PENDING_FILE = path.join(__dirname, "..", "data", "pending.json");
+function readPending() {
+  try {
+    if (fs.existsSync(PENDING_FILE)) {
+      return JSON.parse(fs.readFileSync(PENDING_FILE, "utf-8"));
+    }
+  } catch (e) {}
+  return [];
+}
+function writePending(data) {
+  const dir = path.dirname(PENDING_FILE);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(PENDING_FILE, JSON.stringify(data, null, 2));
+}
+
 // POST /api/company-wise - Add new question
 router.post("/", async (req, res) => {
   try {
-    const { company, type, question, answer, year } = req.body;
+    const { company, type, question, answer, year, role, userId } = req.body;
     if (!company || !type || !question || !answer || !year) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const newQ = {
+      id: Date.now().toString(),
+      type: "company",
       company,
-      type,
+      question_type: type, // map to pending format
       question,
       answer,
       year: parseInt(year),
+      user_id: userId || 'anonymous',
       created_at: new Date().toISOString()
     };
 
-    if (isSupabaseConfigured()) {
-      try {
-        console.log("Saving company question to Supabase...");
-        const { data, error } = await supabase
-          .from("company_questions")
-          .insert([newQ])
-          .select();
-        
-        if (!error && data && data.length > 0) {
-          console.log("Company question saved to Supabase ✅");
-          return res.status(201).json(data[0]);
+    if (role === "admin") {
+      if (isSupabaseConfigured()) {
+        try {
+          console.log("Admin uploading: Saving company question to Supabase...");
+          const { data, error } = await supabase
+            .from("company_questions")
+            .insert([{
+               company: newQ.company, type: newQ.question_type, question: newQ.question, 
+               answer: newQ.answer, year: newQ.year, user_id: newQ.user_id
+            }])
+            .select();
+          
+          if (!error && data && data.length > 0) {
+            console.log("Company question saved to Supabase ✅");
+            return res.status(201).json(data[0]);
+          }
+          console.error("Supabase POST error:", error ? error.message : "No data returned", " - Falling back to local storage");
+        } catch (err) {
+          console.error("Supabase Exception:", err.message, " - Falling back to local storage");
         }
-        console.error("Supabase POST error:", error ? error.message : "No data returned", " - Falling back to local storage");
-      } catch (err) {
-        console.error("Supabase Exception:", err.message, " - Falling back to local storage");
       }
+    } else {
+      console.log("User uploading company Q: Sending to pending queue...");
+      const pending = readPending();
+      pending.push(newQ);
+      writePending(pending);
+      return res.status(201).json({ message: "Question submitted for admin approval! ⏳", data: newQ });
     }
 
     const local = readLocal();

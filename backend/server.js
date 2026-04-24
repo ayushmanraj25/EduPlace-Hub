@@ -18,6 +18,11 @@ app.get("/", (req, res) => {
 const noteRoutes = require("./routes/noteRoutes");
 app.use("/api/notes", noteRoutes);
 
+const pendingRoutes = require("./routes/pendingRoutes");
+app.use("/api/pending", pendingRoutes);
+
+const codingRoutes = require("./routes/codingRoutes");
+app.use("/api/coding", codingRoutes);
 
 const aiRoutes = require("./routes/aiRoutes");
 app.use("/api/ai", aiRoutes);
