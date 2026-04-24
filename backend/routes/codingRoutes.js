@@ -122,6 +122,99 @@ router.post("/add", async (req, res) => {
   }
 });
 
+// ===== LEETCODE AUTO-FETCH =====
+router.post("/fetch-leetcode", async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ message: "LeetCode URL is required" });
+
+    // Extract slug from URL: https://leetcode.com/problems/two-sum/ => two-sum
+    const match = url.match(/leetcode\.com\/problems\/([\w-]+)/);
+    if (!match) return res.status(400).json({ message: "Invalid LeetCode URL. Format: https://leetcode.com/problems/problem-name/" });
+
+    const slug = match[1];
+
+    // Hit LeetCode GraphQL API
+    const graphqlQuery = {
+      query: `query getQuestionDetail($titleSlug: String!) {
+        question(titleSlug: $titleSlug) {
+          title
+          difficulty
+          content
+          topicTags { name slug }
+          exampleTestcaseInput: exampleTestcases
+          sampleTestCase
+          metaData
+        }
+      }`,
+      variables: { titleSlug: slug }
+    };
+
+    const lcRes = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Referer": "https://leetcode.com",
+        "User-Agent": "Mozilla/5.0"
+      },
+      body: JSON.stringify(graphqlQuery)
+    });
+
+    if (!lcRes.ok) {
+      return res.status(502).json({ message: "Failed to reach LeetCode API. Status: " + lcRes.status });
+    }
+
+    const lcData = await lcRes.json();
+    const q = lcData?.data?.question;
+
+    if (!q) {
+      return res.status(404).json({ message: "Problem not found on LeetCode for slug: " + slug });
+    }
+
+    // Parse sample test cases from the HTML content
+    const testCases = [];
+    const content = q.content || "";
+
+    // Extract Input/Output pairs from the examples in HTML
+    // LeetCode format: <strong>Input:</strong> nums = [2,7,11,15], target = 9
+    //                  <strong>Output:</strong> [0,1]
+    const exampleRegex = /<strong>Input:<\/strong>\s*([\s\S]*?)<strong>Output:<\/strong>\s*([\s\S]*?)(?=<strong>(?:Input|Explanation|Example)|<\/pre>|<p>&nbsp;<\/p>|$)/gi;
+    let exMatch;
+    while ((exMatch = exampleRegex.exec(content)) !== null) {
+      let input = exMatch[1].replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+      let output = exMatch[2].replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+      // Clean up newlines
+      input = input.replace(/\n+/g, '\n').trim();
+      output = output.replace(/\n+/g, '\n').trim();
+      if (input || output) {
+        testCases.push({ input, output, isHidden: false });
+      }
+    }
+
+    // Clean HTML description for display
+    let cleanDesc = content
+      .replace(/<strong>Example \d+:<\/strong>/gi, '') // remove example headers (we handle them separately)
+      .replace(/<pre>/g, '<div class="example">')
+      .replace(/<\/pre>/g, '</div>');
+
+    const topics = (q.topicTags || []).map(t => t.name);
+
+    res.json({
+      title: q.title,
+      difficulty: q.difficulty,
+      description: cleanDesc,
+      topics: topics,
+      testCases: testCases,
+      slug: slug,
+      leetcodeUrl: url
+    });
+
+  } catch (err) {
+    console.error("LeetCode fetch error:", err);
+    res.status(500).json({ message: "Failed to fetch from LeetCode: " + err.message });
+  }
+});
+
 // Map standard languages to Piston API format
 const LANGUAGE_VERSIONS = {
   "python": "3.10.0",
