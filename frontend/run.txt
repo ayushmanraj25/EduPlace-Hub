@@ -7,14 +7,10 @@
 // cd frontend → frontend (React app) folder me jaane ke liye
 // npm start → React app ko browser me run karta hai (localhost:3000)
 
-
-
 // cd backend
 // npx nodemon server.js
 
-
 // cd frontend
 // npm start
-
 
 node backend/test-supabase.js
