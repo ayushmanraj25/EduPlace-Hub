@@ -26,7 +26,8 @@ function TextNoteForm({ user, setNotesList, availableSubjects }) {
           subject: subject.trim(),
           topic: topic.trim(),
           content: note.trim(),
-          userId: user.email,
+          userId: user?.email || "anonymous",
+          role: user?.role || "user",
         }),
       });
       const data = await response.json();

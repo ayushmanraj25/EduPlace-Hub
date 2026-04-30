@@ -207,5 +207,4 @@ function QuizModal({ subject, isOpen, onClose }) {
     </div>
   );
 }
-
 export default QuizModal;

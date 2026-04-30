@@ -107,7 +107,6 @@ const linkStyle = {
   fontSize: '14px',
   transition: 'color 0.2s ease',
 };
-
 // Quick CSS hack to add hover effect since we are using inline styles for a component
 // Ideally you'd use a CSS module, but this works cleanly!
 export default () => (

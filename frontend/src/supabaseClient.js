@@ -5,6 +5,4 @@ const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-
-
-// Supabase se connect karna (main kaam)  frontend 
+// Supabase se connect karna (main kaam) frontend 

@@ -26,7 +26,8 @@ function FileUploadForm({ user, setNotesList }) {
       formData.append("subject", uploadSubject.trim());
       formData.append("topic", uploadTopic.trim());
 
-      formData.append("userId", user.email);
+      formData.append("userId", user?.email || "anonymous");
+      formData.append("role", user?.role || "user");
       const response = await fetch("http://localhost:5001/api/notes/upload", {
         method: "POST",
         body: formData,

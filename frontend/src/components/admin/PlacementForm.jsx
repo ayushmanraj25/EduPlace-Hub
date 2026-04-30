@@ -34,13 +34,15 @@ function PlacementForm({ user, setNotesList }) {
             company: placementCompany.trim(),
             type: placementType,
             year: parseInt(placementYear),
-            userId: user.email,
+            userId: user?.email || "anonymous",
+            role: user?.role || "user",
           }
         : {
             category: placementCategory,
             topic: placementTopic.trim(),
             company: placementCompany.trim(),
-            userId: user.email,
+            userId: user?.email || "anonymous",
+            role: user?.role || "user",
           };
 
       if (isBulkMode) {

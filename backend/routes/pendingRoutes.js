@@ -39,7 +39,7 @@ router.get("/user/:email", (req, res) => {
 router.delete("/:id/reject", (req, res) => {
   const { id } = req.params;
   let pending = readPending();
-  pending = pending.filter(item => item.id !== id && item.id !== Number(id));
+  pending = pending.filter(item => String(item.id) !== String(id));
   writePending(pending);
   res.json({ message: "Item rejected and deleted." });
 });
@@ -48,7 +48,7 @@ router.delete("/:id/reject", (req, res) => {
 router.put("/:id/approve", async (req, res) => {
   const { id } = req.params;
   let pending = readPending();
-  const index = pending.findIndex(item => item.id === id || item.id === Number(id));
+  const index = pending.findIndex(item => String(item.id) === String(id));
   
   if (index === -1) {
     return res.status(404).json({ message: "Item not found in pending queue." });

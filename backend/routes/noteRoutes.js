@@ -110,7 +110,9 @@ router.post("/add", async (req, res) => {
         if (!error && data && data.length > 0) {
           return res.status(201).json({ message: "Note saved directly to database!", note: mapNote(data[0]) });
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error("Supabase insert failed:", err);
+      }
     } else {
       console.log("User uploading: Sending to pending queue...");
       const pending = readPending();
@@ -166,8 +168,12 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
         if (!error && data && data.length > 0) {
           return res.status(201).json({ message: "File uploaded successfully!", note: mapNote(data[0]) });
+        } else if (error) {
+          console.error("Supabase returned error on file upload:", error);
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error("Supabase file insert failed:", err);
+      }
     } else {
       console.log("User uploading file: Sending to pending queue...");
       const pending = readPending();

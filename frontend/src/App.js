@@ -74,12 +74,10 @@ function App() {
         handled = true;
         setAuthReady(true);
       }
-
       if (event === 'SIGNED_OUT') {
         localStorage.removeItem("user");
       }
     });
-
     return () => subscription.unsubscribe();
   }, []);
 

@@ -26,7 +26,7 @@ function PendingApprovals() {
         method: "PUT"
       });
       if (res.ok) {
-        setPendingNotes(prev => prev.filter(note => note.id !== id && note.id !== Number(id)));
+        setPendingNotes(prev => prev.filter(note => String(note.id) !== String(id)));
         alert("Item approved and published! ✅");
       } else {
         alert("Failed to approve item");
@@ -44,7 +44,7 @@ function PendingApprovals() {
         method: "DELETE"
       });
       if (res.ok) {
-        setPendingNotes(prev => prev.filter(note => note.id !== id && note.id !== Number(id)));
+        setPendingNotes(prev => prev.filter(note => String(note.id) !== String(id)));
         alert("Item rejected and deleted ❌");
       } else {
         alert("Failed to reject item");
