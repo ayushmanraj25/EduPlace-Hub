@@ -106,7 +106,7 @@ function Admin() {
               onClick={() => setActiveTab("coding")}
               style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "none", background: activeTab === "coding" ? "#8B5CF6" : "transparent", color: activeTab === "coding" ? "#fff" : "var(--text-secondary)", fontWeight: activeTab === "coding" ? "600" : "500", cursor: "pointer", transition: "all 0.2s" }}
             >
-              Codng
+              Codnig
             </button>
           </div>
 
