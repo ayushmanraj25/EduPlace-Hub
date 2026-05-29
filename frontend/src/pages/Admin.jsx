@@ -25,7 +25,7 @@ function Admin() {
       <div className="animate-slide-up" style={{ marginBottom: "40px" }}>
         <h2 className="gradient-text" style={{ fontSize: "38px", marginBottom: "10px" }}>Admin Dashboard</h2>
         <p style={{ color: "var(--text-secondary)", fontSize: "18px" }}>
-          Manage platform content — upload text notes or PDF/document files.
+          Manage platform content — upload text notes or DF/document files.
         </p>
       </div>
 
