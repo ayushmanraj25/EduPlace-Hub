@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function CodingList() {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [solvedQuestions, setSolvedQuestions] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setSolvedQuestions(JSON.parse(localStorage.getItem('solved_coding') || '[]'));
@@ -54,26 +55,51 @@ function CodingList() {
               </tr>
             </thead>
             <tbody>
-              {questions.map((q, idx) => (
-                <tr key={q.id} style={{ borderBottom: "1px solid var(--glass-border)", transition: "background 0.2s" }} onMouseEnter={e => e.currentTarget.style.background="var(--bg-primary)"} onMouseLeave={e => e.currentTarget.style.background="transparent"}>
-                  <td style={{ padding: "16px 8px", width: "60px", textAlign: "center" }}>
-                    {solvedQuestions.includes(String(q.id)) ? (
-                      <span style={{ color: "var(--success)", fontSize: "18px" }}>✅</span>
-                    ) : (
-                      <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--bg-tertiary)", border: "1px solid var(--glass-border)", margin: "0 auto" }}></div>
-                    )}
-                  </td>
-                  <td style={{ padding: "16px 8px", fontWeight: "600", color: "var(--text-primary)" }}>
-                    <Link to={`/coding/${q.id}`} style={{ color: "inherit", textDecoration: "none" }}>{idx + 1}. {q.title}</Link>
-                  </td>
-                  <td style={{ padding: "16px 8px", color: getDifficultyColor(q.difficulty), fontWeight: "600" }}>
-                    {q.difficulty}
-                  </td>
-                  <td style={{ padding: "16px 8px", textAlign: "right" }}>
-                    <Link to={`/coding/${q.id}`} className="secondary-btn" style={{ display: "inline-block", padding: "8px 16px", fontSize: "14px", cursor: "pointer", position: "relative", zIndex: 10 }}>Solve</Link>
-                  </td>
-                </tr>
-              ))}
+              {questions.map((q, idx) => {
+                const qId = q.id || q._id;
+                return (
+                  <tr 
+                    key={qId} 
+                    onClick={() => navigate(`/coding/${qId}`)}
+                    style={{ 
+                      borderBottom: "1px solid var(--glass-border)", 
+                      transition: "background 0.2s", 
+                      cursor: "pointer" 
+                    }} 
+                    onMouseEnter={e => e.currentTarget.style.background="var(--card-highlight)"} 
+                    onMouseLeave={e => e.currentTarget.style.background="transparent"}
+                  >
+                    <td style={{ padding: "16px 8px", width: "60px", textAlign: "center" }}>
+                      {solvedQuestions.includes(String(qId)) ? (
+                        <span style={{ color: "var(--success)", fontSize: "18px" }}>✅</span>
+                      ) : (
+                        <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "var(--bg-tertiary)", border: "1px solid var(--glass-border)", margin: "0 auto" }}></div>
+                      )}
+                    </td>
+                    <td style={{ padding: "16px 8px", fontWeight: "600", color: "var(--text-primary)" }}>
+                      <span style={{ color: "var(--accent-primary)", textDecoration: "none" }}>
+                        {idx + 1}. {q.title}
+                      </span>
+                    </td>
+                    <td style={{ padding: "16px 8px", color: getDifficultyColor(q.difficulty), fontWeight: "600" }}>
+                      {q.difficulty}
+                    </td>
+                    <td style={{ padding: "16px 8px", textAlign: "right" }}>
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/coding/${qId}`);
+                        }} 
+                        className="secondary-btn" 
+                        style={{ display: "inline-block", padding: "8px 16px", fontSize: "14px", cursor: "pointer" }}
+                      >
+                        Solve →
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

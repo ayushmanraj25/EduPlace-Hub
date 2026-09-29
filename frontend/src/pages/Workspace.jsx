@@ -7,6 +7,7 @@ function Workspace() {
   const navigate = useNavigate();
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   const [language, setLanguage] = useState("python");
   const [code, setCode] = useState("");
@@ -27,43 +28,54 @@ function Workspace() {
     };
 
     const loadDraft = async (lang) => {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      if (user?.email) {
-        try {
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        if (user?.email) {
           const res = await fetch(`http://localhost:5001/api/coding/draft/${id}/${user.email}/${lang}`);
-          const data = await res.json();
-          if (data && data.code) {
-            setCode(data.code);
-            localStorage.setItem(`saved_code_${id}_${lang}`, data.code);
-            return true;
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.code) {
+              setCode(data.code);
+              localStorage.setItem(`saved_code_${id}_${lang}`, data.code);
+              return true;
+            }
           }
-        } catch (e) {
-          console.log("Failed to load draft from DB", e);
         }
+      } catch (e) {
+        console.log("Draft load error, using default code:", e);
       }
       return false;
     };
 
+    setLoading(true);
+    setError(null);
+
     fetch(`http://localhost:5001/api/coding/${id}`)
       .then(res => {
-        if (!res.ok) throw new Error("Question not found");
+        if (!res.ok) throw new Error("Question not found (HTTP " + res.status + ")");
         return res.json();
       })
       .then(async data => {
         setQuestion(data);
-        const hasDbDraft = await loadDraft(language);
-        if (!hasDbDraft) {
+        try {
+          const hasDbDraft = await loadDraft(language);
+          if (!hasDbDraft) {
+            const savedCode = localStorage.getItem(`saved_code_${id}_${language}`);
+            setCode(savedCode ? savedCode : defaultCodeMap[language]);
+          }
+        } catch (draftErr) {
           const savedCode = localStorage.getItem(`saved_code_${id}_${language}`);
           setCode(savedCode ? savedCode : defaultCodeMap[language]);
         }
         setLoading(false);
       })
       .catch(err => {
-        console.error(err);
-        navigate("/coding");
+        console.error("Workspace question fetch error:", err);
+        setError("Failed to load question details: " + err.message);
+        setLoading(false);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, navigate]);
+  }, [id]);
 
   const handleLanguageChange = async (e) => {
     const defaultCodeMap = {
@@ -177,13 +189,41 @@ function Workspace() {
     document.addEventListener("mouseup", onMouseUp);
   };
 
-  if (loading) return <div style={{ padding: "40px", textAlign: "center" }}>Loading workspace...</div>;
-  if (!question) return <div style={{ padding: "40px", textAlign: "center" }}>Question not found.</div>;
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
+        <div style={{ textAlign: "center", color: "var(--text-secondary)" }}>
+          <div style={{ width: "36px", height: "36px", border: "4px solid var(--glass-border)", borderTop: "4px solid var(--accent-primary)", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 16px" }} />
+          Loading workspace...
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !question) {
+    return (
+      <div style={{ padding: "60px 20px", textAlign: "center" }}>
+        <h3 style={{ color: "var(--danger)", marginBottom: "16px" }}>{error || "Question not found."}</h3>
+        <button onClick={() => navigate("/coding")} className="primary-btn">← Back to Coding Arena</button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", height: "calc(100vh - 70px)", background: "var(--bg-primary)" }}>
       {/* LEFT PANEL: PROBLEM DESCRIPTION */}
       <div style={{ width: `${leftWidth}%`, borderRight: "1px solid var(--glass-border)", padding: "24px", overflowY: "auto", background: "var(--bg-secondary)", display: "flex", flexDirection: "column" }}>
+        <button 
+          onClick={() => navigate('/coding')}
+          style={{ 
+            background: 'transparent', border: 'none', color: 'var(--text-secondary)', 
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', 
+            fontSize: '13px', fontWeight: '600', marginBottom: '16px', padding: 0 
+          }}
+        >
+          ← Back to Arena
+        </button>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
           <h2 style={{ margin: 0, fontSize: "24px" }}>{question.title}</h2>
           <span style={{ 

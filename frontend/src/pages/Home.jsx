@@ -1,95 +1,7 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
-  const [latestNotes, setLatestNotes] = useState([]);
-  const [currentPopupIndex, setCurrentPopupIndex] = useState(0);
   const navigate = useNavigate();
-
-  // Cycle through the updates every 4 seconds
-  useEffect(() => {
-    if (latestNotes.length > 0) {
-      const timer = setInterval(() => {
-        setCurrentPopupIndex((prev) => (prev + 1) % latestNotes.length);
-      }, 1600); // 1.6 seconds per popup
-      return () => clearInterval(timer);
-    }
-  }, [latestNotes]);
-
-  // Auto refresh every 5 seconds
-  useEffect(() => {
-    fetchNotes();
-    const interval = setInterval(fetchNotes, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchNotes = async () => {
-    try {
-      const [notesRes, placementRes, companyRes] = await Promise.all([
-        fetch("http://localhost:5001/api/notes"),
-        fetch("http://localhost:5001/api/placement"),
-        fetch("http://localhost:5001/api/company-wise")
-      ]);
-
-      const [notesData, placementsData, companyData] = await Promise.all([
-        notesRes.ok ? notesRes.json() : [],
-        placementRes.ok ? placementRes.json() : [],
-        companyRes.ok ? companyRes.json() : []
-      ]);
-
-      const notes = Array.isArray(notesData) ? notesData.map(n => ({
-        _id: n._id || n.id,
-        subject: n.subject,
-        topic: n.topic,
-        content: n.content,
-        createdAt: n.createdAt || n.created_at || "2000-01-01T00:00:00.000Z"
-      })) : [];
-
-      const placements = Array.isArray(placementsData) ? placementsData.map(p => ({
-        _id: p._id || p.id,
-        subject: p.category || "Placement Prep",
-        topic: p.topic || p.company || "General",
-        content: p.question,
-        createdAt: p.createdAt || p.created_at || "2000-01-01T00:00:00.000Z"
-      })) : [];
-
-      const company = Array.isArray(companyData) ? companyData.map(c => ({
-        _id: c._id || c.id,
-        subject: `Company: ${c.company}`,
-        topic: c.type || "Interview",
-        content: c.question,
-        createdAt: c.createdAt || c.created_at || "2000-01-01T00:00:00.000Z"
-      })) : [];
-
-      const combined = [...notes, ...placements, ...company];
-
-      const sorted = combined.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-
-      setLatestNotes(sorted.slice(0, 5));
-    } catch (error) {
-      console.error("Failed to fetch dashboard updates:", error);
-    }
-  };
-
-  const timeAgo = (dateString) => {
-    const date = new Date(dateString);
-    const seconds = Math.floor((new Date() - date) / 1000);
-    
-    if (seconds < 60) return "Just now";
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} min${minutes !== 1 ? 's' : ''} ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} hr${hours !== 1 ? 's' : ''} ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days !== 1 ? 's' : ''} ago`;
-  };
-
-  const isRecent = (dateString) => {
-    const diff = new Date() - new Date(dateString);
-    return diff < 24 * 60 * 60 * 1000; // less than 24 hours
-  };
 
   return (
     <div className="page-container">
@@ -197,47 +109,7 @@ function Home() {
         </div>
       </section>
 
-      {/* Single Cycling Popup for Live Activity */}
-      <div style={{ position: 'fixed', bottom: '100px', right: '20px', zIndex: 9999, pointerEvents: 'none' }}>
-        {latestNotes.length > 0 && (() => {
-          const note = latestNotes[currentPopupIndex];
-          let actionText = "published new study material";
-          let iconColor = "var(--accent-primary)";
-          const subjectLower = note.subject?.toLowerCase() || "";
-          
-          if (subjectLower.includes("company")) {
-            iconColor = "var(--warning)";
-            actionText = "added a company prep question";
-          } else if (subjectLower.includes("placement")) {
-            iconColor = "#3B82F6";
-            actionText = "posted an interview question";
-          } else if (subjectLower.includes("ai") || note.topic?.toLowerCase().includes("ai")) {
-            iconColor = "#8B5CF6";
-            actionText = "generated AI-assisted insights";
-          }
 
-          return (
-            <div key={note._id + currentPopupIndex} className="animate-slide-in-right" style={{ 
-              width: '320px', padding: '16px', background: 'var(--bg-secondary)', 
-              borderRadius: '12px', border: '1px solid var(--glass-border)', 
-              borderLeft: `4px solid ${iconColor}`,
-              boxShadow: '0 10px 25px rgba(0,0,0,0.1)', pointerEvents: 'auto',
-              display: 'flex', flexDirection: 'column', gap: '8px'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '11px', fontWeight: 'bold', color: iconColor }}>LIVE UPDATE</span>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{timeAgo(note.createdAt)}</span>
-              </div>
-              <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-primary)', lineHeight: '1.4' }}>
-                <strong style={{ fontWeight: '700' }}>Admin</strong> {actionText} in <span style={{ fontWeight: '600' }}>{note.subject}</span>
-              </p>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', background: 'var(--bg-primary)', padding: '6px 10px', borderRadius: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {note.topic}
-              </div>
-            </div>
-          );
-        })()}
-      </div>
 
       {/* ✨ 3. Enhanced Features Grid */}
       <div style={{ textAlign: 'center', marginBottom: '40px' }} className="animate-slide-up delay-300">

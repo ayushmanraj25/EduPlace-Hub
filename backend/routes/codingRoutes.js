@@ -67,7 +67,12 @@ router.get("/:id", async (req, res) => {
       } catch (e) {}
     }
     const local = readLocal();
-    const q = local.find(x => x.id === id || x.id === Number(id));
+    const q = local.find(x => 
+      String(x.id) === String(id) || 
+      String(x._id) === String(id) || 
+      x.id === Number(id) || 
+      x.id === id
+    );
     if (q) return res.json(mapQuestion(q));
     
     res.status(404).json({ message: "Question not found" });
