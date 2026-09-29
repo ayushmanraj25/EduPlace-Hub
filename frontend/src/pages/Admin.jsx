@@ -25,7 +25,7 @@ function Admin() {
       <div className="animate-slide-up" style={{ marginBottom: "40px" }}>
         <h2 className="gradient-text" style={{ fontSize: "38px", marginBottom: "10px" }}>Admin Dashboard</h2>
         <p style={{ color: "var(--text-secondary)", fontSize: "18px" }}>
-          Manage platform content — upload text notes or DF/document files.
+          Manage platform content — upload text notes or PDF/document files.
         </p>
       </div>
 
@@ -106,7 +106,7 @@ function Admin() {
               onClick={() => setActiveTab("coding")}
               style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "none", background: activeTab === "coding" ? "#8B5CF6" : "transparent", color: activeTab === "coding" ? "#fff" : "var(--text-secondary)", fontWeight: activeTab === "coding" ? "600" : "500", cursor: "pointer", transition: "all 0.2s" }}
             >
-              Codnig
+              Coding
             </button>
           </div>
 

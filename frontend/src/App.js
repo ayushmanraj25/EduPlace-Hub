@@ -58,27 +58,55 @@ function App() {
     };
 
     // 1. Check existing session first
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      syncUser(session);
-      if (!handled) {
-        handled = true;
-        setAuthReady(true);
-      }
-    });
+    if (supabase?.auth) {
+      supabase.auth.getSession().then(({ data: { session } = {} }) => {
+        syncUser(session);
+        if (!handled) {
+          handled = true;
+          setAuthReady(true);
+        }
+      }).catch((err) => {
+        console.warn("Supabase session check error:", err);
+        if (!handled) {
+          handled = true;
+          setAuthReady(true);
+        }
+      });
 
-    // 2. Listen for auth changes (handles the OAuth redirect callback)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      syncUser(session);
-      
-      if (!handled) {
-        handled = true;
-        setAuthReady(true);
+      // 2. Listen for auth changes (handles the OAuth redirect callback)
+      let subscription = null;
+      try {
+        const authSub = supabase.auth.onAuthStateChange((event, session) => {
+          syncUser(session);
+          
+          if (!handled) {
+            handled = true;
+            setAuthReady(true);
+          }
+          if (event === 'SIGNED_OUT') {
+            localStorage.removeItem("user");
+          }
+        });
+        subscription = authSub?.data?.subscription;
+      } catch (err) {
+        console.warn("Supabase onAuthStateChange error:", err);
       }
-      if (event === 'SIGNED_OUT') {
-        localStorage.removeItem("user");
-      }
-    });
-    return () => subscription.unsubscribe();
+
+      // Safety fallback timer to prevent infinite spinner
+      const timeout = setTimeout(() => {
+        if (!handled) {
+          handled = true;
+          setAuthReady(true);
+        }
+      }, 1500);
+
+      return () => {
+        clearTimeout(timeout);
+        subscription?.unsubscribe?.();
+      };
+    } else {
+      setAuthReady(true);
+    }
   }, []);
 
   return (

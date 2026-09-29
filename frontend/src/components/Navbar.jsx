@@ -12,7 +12,13 @@ function Navbar() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      if (supabase?.auth) {
+        await supabase.auth.signOut();
+      }
+    } catch (err) {
+      console.warn("Supabase signOut error:", err);
+    }
     localStorage.removeItem("user");
     window.location.href = "/login";
   };

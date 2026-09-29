@@ -24,8 +24,9 @@ router.post("/generate", async (req, res) => {
     // AI client create
     // model select (fast + cheap)
     
+    const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     const systemPrompt = `You are an intelligent, helpful, and conversational AI assistant for a student platform called EduPlace-Hub. 
     User query: "{prompt}"
@@ -90,10 +91,11 @@ router.post("/format-bulk", async (req, res) => {
       return res.status(500).json({ message: "API Key Missing." });
     }
     
+    const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
     const genAI = new GoogleGenerativeAI(apiKey);
     // Use flash model, but instruct it to return strictly JSON
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
+      model: modelName,
       generationConfig: { responseMimeType: "application/json" }
     });
 

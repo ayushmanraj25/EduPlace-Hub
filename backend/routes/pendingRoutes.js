@@ -94,6 +94,31 @@ router.put("/:id/approve", async (req, res) => {
     };
   }
 
+  if (!supabase) {
+    let localFile = "";
+    if (item.type === "note" || item.type === "file") {
+      localFile = path.join(__dirname, "..", "data", "notes.json");
+    } else if (item.type === "placement") {
+      localFile = path.join(__dirname, "..", "data", "placement.json");
+    } else if (item.type === "company") {
+      localFile = path.join(__dirname, "..", "data", "company_wise.json");
+    }
+    if (localFile) {
+      let localList = [];
+      try {
+        if (fs.existsSync(localFile)) localList = JSON.parse(fs.readFileSync(localFile, "utf-8"));
+      } catch (e) {}
+      const savedItem = { ...payload, id: Date.now().toString(), _id: Date.now().toString() };
+      localList.push(savedItem);
+      const dir = path.dirname(localFile);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(localFile, JSON.stringify(localList, null, 2));
+    }
+    pending.splice(index, 1);
+    writePending(pending);
+    return res.json({ message: "Item approved and published (local storage)!", data: payload });
+  }
+
   try {
     const { data, error } = await supabase.from(tableName).insert([payload]).select();
     

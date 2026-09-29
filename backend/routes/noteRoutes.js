@@ -26,18 +26,19 @@ function writeLocal(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
-// Map Supabase snake_case to frontend camelCase
+// Map Supabase snake_case & local camelCase to frontend camelCase
 function mapNote(note) {
+  if (!note) return null;
   return {
-    _id: note.id,
-    userId: note.user_id,
+    _id: note.id || note._id,
+    userId: note.user_id || note.userId,
     subject: note.subject,
     topic: note.topic,
     content: note.content,
-    fileUrl: note.file_url,
-    fileName: note.file_name,
-    fileSize: note.file_size,
-    createdAt: note.created_at
+    fileUrl: note.file_url || note.fileUrl,
+    fileName: note.file_name || note.fileName,
+    fileSize: note.file_size || note.fileSize,
+    createdAt: note.created_at || note.createdAt
   };
 }
 // File upload config
@@ -100,18 +101,20 @@ router.post("/add", async (req, res) => {
     };
 
     if (role === "admin") {
-      try {
-        console.log("Admin uploading: Saving directly to Supabase...");
-        const { data, error } = await supabase
-          .from('notes')
-          .insert([{ subject, topic, content, user_id: userId || 'anonymous' }])
-          .select();
+      if (supabase) {
+        try {
+          console.log("Admin uploading: Saving directly to Supabase...");
+          const { data, error } = await supabase
+            .from('notes')
+            .insert([{ subject, topic, content, user_id: userId || 'anonymous' }])
+            .select();
 
-        if (!error && data && data.length > 0) {
-          return res.status(201).json({ message: "Note saved directly to database!", note: mapNote(data[0]) });
+          if (!error && data && data.length > 0) {
+            return res.status(201).json({ message: "Note saved directly to database!", note: mapNote(data[0]) });
+          }
+        } catch (err) {
+          console.error("Supabase insert failed:", err);
         }
-      } catch (err) {
-        console.error("Supabase insert failed:", err);
       }
     } else {
       console.log("User uploading: Sending to pending queue...");
@@ -156,23 +159,25 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     };
 
     if (role === "admin") {
-      try {
-        console.log("Admin uploading file: Saving to Supabase...");
-        const { data, error } = await supabase
-          .from('notes')
-          .insert([{
-            subject, topic, user_id: userId || 'anonymous',
-            content: `[File Upload] ${req.file.originalname}`,
-            file_url: fileUrl, file_name: req.file.originalname, file_size: req.file.size
-          }]).select();
+      if (supabase) {
+        try {
+          console.log("Admin uploading file: Saving to Supabase...");
+          const { data, error } = await supabase
+            .from('notes')
+            .insert([{
+              subject, topic, user_id: userId || 'anonymous',
+              content: `[File Upload] ${req.file.originalname}`,
+              file_url: fileUrl, file_name: req.file.originalname, file_size: req.file.size
+            }]).select();
 
-        if (!error && data && data.length > 0) {
-          return res.status(201).json({ message: "File uploaded successfully!", note: mapNote(data[0]) });
-        } else if (error) {
-          console.error("Supabase returned error on file upload:", error);
+          if (!error && data && data.length > 0) {
+            return res.status(201).json({ message: "File uploaded successfully!", note: mapNote(data[0]) });
+          } else if (error) {
+            console.error("Supabase returned error on file upload:", error);
+          }
+        } catch (err) {
+          console.error("Supabase file insert failed:", err);
         }
-      } catch (err) {
-        console.error("Supabase file insert failed:", err);
       }
     } else {
       console.log("User uploading file: Sending to pending queue...");
@@ -194,17 +199,19 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 // GET /api/notes - Get notes
 router.get("/", async (req, res) => {
   try {
-    try {
-      console.log("Fetching notes from Supabase...");
-      const { data, error } = await supabase
-        .from('notes')
-        .select('*')
-        .order('created_at', { ascending: false });
+    if (supabase) {
+      try {
+        console.log("Fetching notes from Supabase...");
+        const { data, error } = await supabase
+          .from('notes')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        return res.json(data.map(mapNote));
-      }
-    } catch (err) {}
+        if (!error && data) {
+          return res.json(data.map(mapNote));
+        }
+      } catch (err) {}
+    }
 
     const local = readLocal();
     res.json(local.reverse().map(mapNote));
@@ -217,20 +224,22 @@ router.get("/", async (req, res) => {
 router.get("/user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    try {
-      const { data, error } = await supabase
-        .from('notes')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('notes')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
 
-      if (!error && data) {
-        return res.json(data.map(mapNote));
-      }
-    } catch (err) {}
+        if (!error && data) {
+          return res.json(data.map(mapNote));
+        }
+      } catch (err) {}
+    }
 
     let local = readLocal();
-    local = local.filter(n => n.user_id === userId);
+    local = local.filter(n => (n.user_id || n.userId) === userId);
     res.json(local.reverse().map(mapNote));
   } catch (error) {
     res.status(500).json({ message: "Server Error" });

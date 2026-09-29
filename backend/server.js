@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 const app = express();
 
@@ -11,7 +12,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Default route
 app.get("/", (req, res) => {
-  res.send("EduPlace Hub Backend with Supabase Running");
+  res.send("EduPlace Hub Backend Running");
 });
 
 // Routes
@@ -53,6 +54,10 @@ const supabase = require("./config/supabase");
 
 (async () => {
   try {
+    if (!supabase) {
+      console.log("ℹ️  Supabase credentials not configured in backend/.env — using local JSON storage.");
+      return;
+    }
     console.log("Checking Supabase connection...");
     const { error } = await supabase.from("notes").select("id").limit(1);
     if (error) {
