@@ -118,6 +118,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Login defaultSignup={true} />} />
             <Route path="/subjects" element={<ProtectedRoute authReady={authReady} element={<Subjects />} />} />
             <Route path="/subjects/:subjectName" element={<ProtectedRoute authReady={authReady} element={<SubjectView />} />} />
             <Route path="/placement" element={<ProtectedRoute authReady={authReady} element={<Placement />} />} />

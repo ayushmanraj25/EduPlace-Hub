@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../../apiConfig";
 
 function PendingApprovals() {
   const [pendingNotes, setPendingNotes] = useState([]);
@@ -6,7 +7,7 @@ function PendingApprovals() {
 
   const fetchPendingNotes = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/pending");
+      const res = await fetch(`${API_BASE_URL}/pending`);
       const data = await res.json();
       setPendingNotes(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -22,7 +23,7 @@ function PendingApprovals() {
 
   const handleApprove = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/pending/${id}/approve`, {
+      const res = await fetch(`${API_BASE_URL}/pending/${id}/approve`, {
         method: "PUT"
       });
       if (res.ok) {
@@ -40,7 +41,7 @@ function PendingApprovals() {
   const handleReject = async (id) => {
     if (!window.confirm("Are you sure you want to reject and delete this item?")) return;
     try {
-      const res = await fetch(`http://localhost:5001/api/pending/${id}/reject`, {
+      const res = await fetch(`${API_BASE_URL}/pending/${id}/reject`, {
         method: "DELETE"
       });
       if (res.ok) {

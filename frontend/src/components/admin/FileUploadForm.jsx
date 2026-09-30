@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_BASE_URL } from "../../apiConfig";
 
 function FileUploadForm({ user, setNotesList }) {
   const [uploadFile, setUploadFile] = useState(null);
@@ -28,7 +29,7 @@ function FileUploadForm({ user, setNotesList }) {
 
       formData.append("userId", user?.email || "anonymous");
       formData.append("role", user?.role || "user");
-      const response = await fetch("http://localhost:5001/api/notes/upload", {
+      const response = await fetch(`${API_BASE_URL}/notes/upload`, {
         method: "POST",
         body: formData,
       });

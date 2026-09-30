@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_BASE_URL } from "../../apiConfig";
 
 function TextNoteForm({ user, setNotesList, availableSubjects }) {
   const [subject, setSubject] = useState("");
@@ -17,7 +18,7 @@ function TextNoteForm({ user, setNotesList, availableSubjects }) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5001/api/notes/add", {
+      const response = await fetch(`${API_BASE_URL}/notes/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

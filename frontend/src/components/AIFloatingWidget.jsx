@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 
 function AIFloatingWidget() {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -27,6 +30,11 @@ function AIFloatingWidget() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  // Don't show floating assistant on login or signup pages to prevent blocking inputs or submit buttons
+  if (location.pathname === "/login" || location.pathname === "/signup") {
+    return null;
+  }
 
   const saveBookmark = () => {
     if (!answer || answer.includes("⚠️ Error")) return;
@@ -58,7 +66,7 @@ function AIFloatingWidget() {
 
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const response = await fetch("http://localhost:5001/api/ai/generate", {
+      const response = await fetch(`${API_BASE_URL}/ai/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: queryToSend, userId: user.email }),
@@ -133,8 +141,8 @@ function AIFloatingWidget() {
   return (
     <div ref={widgetRef} style={{
       position: "fixed",
-      bottom: "30px",
-      right: "30px",
+      bottom: "clamp(16px, 3vw, 30px)",
+      right: "clamp(16px, 3vw, 30px)",
       zIndex: 9999,
       display: "flex",
       flexDirection: "column",
@@ -142,9 +150,9 @@ function AIFloatingWidget() {
     }}>
       {/* Expanded Chat Box */}
       <div className="glass-panel" style={{
-        width: "360px",
-        height: "480px",
-        marginBottom: "15px",
+        width: "min(360px, calc(100vw - 32px))",
+        height: "min(480px, calc(100vh - 130px))",
+        marginBottom: "12px",
         display: "flex",
         flexDirection: "column",
         borderRadius: "16px",

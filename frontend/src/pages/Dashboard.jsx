@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import FileUploadForm from "../components/admin/FileUploadForm";
 import TextNoteForm from "../components/admin/TextNoteForm";
+import { API_BASE_URL } from "../apiConfig";
 
 function Dashboard() {
   const [userNotes, setUserNotes] = useState([]);
@@ -28,8 +29,8 @@ function Dashboard() {
     setLoading(true);
     try {
       const [approvedRes, pendingRes] = await Promise.all([
-        fetch(`http://localhost:5001/api/notes/user/${email}`),
-        fetch(`http://localhost:5001/api/pending/user/${email}`)
+        fetch(`${API_BASE_URL}/notes/user/${email}`),
+        fetch(`${API_BASE_URL}/pending/user/${email}`)
       ]);
       const approvedData = await approvedRes.json();
       const pendingData = await pendingRes.json();

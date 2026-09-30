@@ -15,6 +15,7 @@ import {
   Code
 } from "lucide-react";
 import axios from "axios";
+import { API_BASE_URL } from "../apiConfig";
 
 // Constants for companies as requested
 const COMPANIES = [
@@ -30,8 +31,6 @@ const COMPANIES = [
 
 const QUESTION_TYPES = ["Aptitude", "Technical", "Coding", "HR", "System Design"];
 const YEARS = [2026, 2025, 2024, 2023];
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5001/api";
 
 function CompanyWise() {
   const navigate = useNavigate();

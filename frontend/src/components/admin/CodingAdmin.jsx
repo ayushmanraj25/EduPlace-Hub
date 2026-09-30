@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_BASE_URL } from "../../apiConfig";
 
 function CodingAdmin({ user }) {
   const [title, setTitle] = useState("");
@@ -18,7 +19,7 @@ function CodingAdmin({ user }) {
     setFetching(true);
     setFetchMsg("");
     try {
-      const res = await fetch("http://localhost:5001/api/coding/fetch-leetcode", {
+      const res = await fetch(`${API_BASE_URL}/coding/fetch-leetcode`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: leetcodeUrl.trim() })
@@ -67,7 +68,7 @@ function CodingAdmin({ user }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5001/api/coding/add", {
+      const res = await fetch(`${API_BASE_URL}/coding/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

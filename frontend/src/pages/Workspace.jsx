@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Editor from "@monaco-editor/react";
+import { API_BASE_URL } from "../apiConfig";
 
 function Workspace() {
   const { id } = useParams();
@@ -31,7 +32,7 @@ function Workspace() {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         if (user?.email) {
-          const res = await fetch(`http://localhost:5001/api/coding/draft/${id}/${user.email}/${lang}`);
+          const res = await fetch(`${API_BASE_URL}/coding/draft/${id}/${user.email}/${lang}`);
           if (res.ok) {
             const data = await res.json();
             if (data && data.code) {
@@ -50,7 +51,7 @@ function Workspace() {
     setLoading(true);
     setError(null);
 
-    fetch(`http://localhost:5001/api/coding/${id}`)
+    fetch(`${API_BASE_URL}/coding/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("Question not found (HTTP " + res.status + ")");
         return res.json();
@@ -91,7 +92,7 @@ function Workspace() {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     if (user?.email) {
       try {
-        const res = await fetch(`http://localhost:5001/api/coding/draft/${id}/${user.email}/${newLang}`);
+        const res = await fetch(`${API_BASE_URL}/coding/draft/${id}/${user.email}/${newLang}`);
         const data = await res.json();
         if (data && data.code) {
           setCode(data.code);
@@ -117,7 +118,7 @@ function Workspace() {
     if (user?.email) {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
-        fetch("http://localhost:5001/api/coding/draft", {
+        fetch(`${API_BASE_URL}/coding/draft`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: user.email, questionId: id, language, code: val })
@@ -131,7 +132,7 @@ function Workspace() {
     setOutput(null);
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     try {
-      const res = await fetch("http://localhost:5001/api/coding/execute", {
+      const res = await fetch(`${API_BASE_URL}/coding/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

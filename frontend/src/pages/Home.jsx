@@ -41,7 +41,7 @@ function Home() {
           </p>
           
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <button className="primary-btn" onClick={() => navigate('/login')} style={{ fontSize: '16px', padding: '14px 32px' }}>
+            <button className="primary-btn" onClick={() => navigate('/signup')} style={{ fontSize: '16px', padding: '14px 32px' }}>
               Start Learning for Free
             </button>
             <button className="secondary-btn" onClick={() => navigate('/subjects')} style={{ fontSize: '16px', padding: '14px 32px' }}>

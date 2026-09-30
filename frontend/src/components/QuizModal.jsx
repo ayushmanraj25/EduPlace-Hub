@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../apiConfig';
 
 function QuizModal({ subject, isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
@@ -27,7 +28,7 @@ function QuizModal({ subject, isOpen, onClose }) {
         }
       ]`;
 
-      const response = await fetch("http://localhost:5001/api/ai/generate", {
+      const response = await fetch(`${API_BASE_URL}/ai/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt, userId: user.email }),

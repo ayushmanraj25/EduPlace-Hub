@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 
 function CodingList() {
   const [questions, setQuestions] = useState([]);
@@ -9,7 +10,7 @@ function CodingList() {
 
   useEffect(() => {
     setSolvedQuestions(JSON.parse(localStorage.getItem('solved_coding') || '[]'));
-    fetch("http://localhost:5001/api/coding")
+    fetch(`${API_BASE_URL}/coding`)
       .then(res => res.json())
       .then(data => {
         setQuestions(Array.isArray(data) ? data : []);

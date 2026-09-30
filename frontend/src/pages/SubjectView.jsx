@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import QuizModal from "../components/QuizModal";
+import { API_BASE_URL } from "../apiConfig";
 
 function SubjectView() {
   const { subjectName } = useParams();
@@ -31,7 +32,7 @@ function SubjectView() {
     // Only scroll to top when page mounts
     window.scrollTo(0, 0);
     
-    fetch("http://localhost:5001/api/notes")
+    fetch(`${API_BASE_URL}/notes`)
       .then((res) => res.json())
       .then((data) => setNotes(data))
       .catch((err) => console.error(err));

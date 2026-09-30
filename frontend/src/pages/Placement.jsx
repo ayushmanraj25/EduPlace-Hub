@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "../apiConfig";
 
 function Placement() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ function Placement() {
   const fetchQuestions = async (category) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5001/api/placement?category=${encodeURIComponent(category)}`);
+      const res = await fetch(`${API_BASE_URL}/placement?category=${encodeURIComponent(category)}`);
       const data = await res.json();
       setQuestions(data);
     } catch (error) {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_BASE_URL } from "../../apiConfig";
 
 function PlacementForm({ user, setNotesList }) {
   const [placementCategory, setPlacementCategory] = useState("Aptitude");
@@ -26,8 +27,8 @@ function PlacementForm({ user, setNotesList }) {
     setPlacementLoading(true);
     try {
       const endpoint = isCompanyWise
-        ? "http://localhost:5001/api/company-wise"
-        : "http://localhost:5001/api/placement/add";
+        ? `${API_BASE_URL}/company-wise`
+        : `${API_BASE_URL}/placement/add`;
 
       const basePayload = isCompanyWise
         ? {
@@ -46,7 +47,7 @@ function PlacementForm({ user, setNotesList }) {
           };
 
       if (isBulkMode) {
-        const aiResponse = await fetch("http://localhost:5001/api/ai/format-bulk", {
+        const aiResponse = await fetch(`${API_BASE_URL}/ai/format-bulk`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

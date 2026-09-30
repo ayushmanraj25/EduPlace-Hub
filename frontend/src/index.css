@@ -260,3 +260,28 @@ select.input-control option {
 .animate-slide-in-right {
   animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* =========================================
+   MOBILE RESPONSIVENESS & TOUCH OPTIMIZATIONS
+   ========================================= */
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .mobile-nav-toggle {
+    display: flex !important;
+  }
+  .page-container {
+    padding: 20px 4% !important;
+    min-height: calc(100vh - 100px);
+  }
+  .input-control {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS */
+    padding: 12px 14px;
+  }
+  .primary-btn, .secondary-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
